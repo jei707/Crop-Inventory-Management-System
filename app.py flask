@@ -1,0 +1,42 @@
+from flask import Flask, jsonify, request
+from inventory_module import crop_inventory, add_crop, delete_crop, edit_crop, display_crops
+
+app = Flask(__name__)
+
+@app.route('/crops', methods=['GET'])
+def get_crops():
+    return jsonify(crop_inventory)
+
+@app.route('/crops', methods=['POST'])
+def add_new_crop():
+    data = request.json
+    crop = {
+        "Local Name": data.get("local_name"),
+        "Category": data.get("category"),
+        "Seasonality": data.get("seasonality"),
+        "Item Code": data.get("item_code"),
+        "Year": data.get("year"),
+        "Flag Description": data.get("flag_description"),
+        "Harvest Date": data.get("harvest_date"),
+        "Quantity": data.get("quantity")
+    }
+    crop_inventory.append(crop)
+    return jsonify({"message": "Crop added successfully"}), 201
+
+@app.route('/crops/<int:index>', methods=['DELETE'])
+def delete_existing_crop(index):
+    if 0 <= index < len(crop_inventory):
+        crop_inventory.pop(index)
+        return jsonify({"message": "Crop deleted successfully"})
+    return jsonify({"error": "Crop not found"}), 404
+
+@app.route('/crops/<int:index>', methods=['PUT'])
+def edit_existing_crop(index):
+    if 0 <= index < len(crop_inventory):
+        data = request.json
+        crop_inventory[index].update(data)
+        return jsonify({"message": "Crop updated successfully"})
+    return jsonify({"error": "Crop not found"}), 404
+
+if __name__ == "__main__":
+    app.run(debug=True)
