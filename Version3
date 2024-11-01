@@ -1,0 +1,322 @@
+from datetime import datetime
+
+# Crop Inventory System with Timsort for Local Name Sorting
+crop_inventory = []
+
+# Enums categorical sorting
+CATEGORY_ORDER = ["Vegetables", "Fruits", "Fibre Crop", "Nut", "Root and Tuber", "Stimulant", "Tobacco", "Pulse", "Oil Crop"]
+SEASONALITY_ORDER = ["Wet", "Dry", "Wet and Dry"]
+FLAG_DESCRIPTION_ORDER = ["Organic", "Non-GMO", "Hybrid", "Heirloom"]
+
+MIN_MERGE = 32
+def insertion_sort(arr, left, right, key):
+    for i in range(left + 1, right + 1):
+        temp = arr[i]
+        j = i - 1
+        while j >= left and arr[j][key] > temp[key]:
+            arr[j + 1] = arr[j]
+            j -= 1
+        arr[j + 1] = temp
+
+def merge(arr, l, m, r, key):
+    left = arr[l:m + 1]
+    right = arr[m + 1:r + 1]
+    i = j = 0
+    k = l
+
+    while i < len(left) and j < len(right):
+        if left[i][key] <= right[j][key]:
+            arr[k] = left[i]
+            i += 1
+        else:
+            arr[k] = right[j]
+            j += 1
+        k += 1
+
+    while i < len(left):
+        arr[k] = left[i]
+        i += 1
+        k += 1
+
+    while j < len(right):
+        arr[k] = right[j]
+        j += 1
+        k += 1
+
+def timsort(arr, key):
+    n = len(arr)
+    for i in range(0, n, MIN_MERGE):
+        insertion_sort(arr, i, min((i + MIN_MERGE - 1), n - 1), key)
+
+    size = MIN_MERGE
+    while size < n:
+        for left in range(0, n, size * 2):
+            mid = min((n - 1), (left + size - 1))
+            right = min((n - 1), (left + 2 * size - 1))
+            if mid < right:
+                merge(arr, left, mid, right, key)
+        size *= 2
+
+def pigeonhole_sort_category(arr):
+    # Create pigeonholes for each category in CATEGORY_ORDER
+    pigeonholes = {category: [] for category in CATEGORY_ORDER}
+    for crop in arr:
+        if crop["Category"] in pigeonholes:
+            pigeonholes[crop["Category"]].append(crop)
+
+    # Flatten the pigeonholes to get a sorted list by category
+    sorted_arr = []
+    for category in CATEGORY_ORDER:
+        sorted_arr.extend(pigeonholes[category])
+    return sorted_arr
+
+def bingo_sort_seasonality(arr):
+    max_index = len(arr) - 1
+    while max_index > 0:
+        max_value = max(arr[:max_index + 1], key=lambda crop: SEASONALITY_ORDER.index(crop["Seasonality"]))
+        max_value_index = SEASONALITY_ORDER.index(max_value["Seasonality"])
+
+        next_position = 0
+        for i in range(max_index + 1):
+            if SEASONALITY_ORDER.index(arr[i]["Seasonality"]) == max_value_index:
+                arr[i], arr[next_position] = arr[next_position], arr[i]
+                next_position += 1
+
+        max_index = next_position - 1
+    return arr
+
+
+def selection_sort_item_code(arr):
+    n = len(arr)
+    for i in range(n):
+        min_index = i
+        for j in range(i + 1, n):
+            if arr[j]["Item Code"] < arr[min_index]["Item Code"]:
+                min_index = j
+        arr[i], arr[min_index] = arr[min_index], arr[i]
+    return arr
+
+
+# Strand Sort for Year
+def strand_sort(arr, key, is_date=False):
+    if not arr:
+        return []
+
+    result = []
+    while arr:
+        sublist = [arr.pop(0)]
+        i = 0
+        while i < len(arr):
+            if (is_date and datetime.strptime(arr[i][key], "%Y-%m-%d") >= datetime.strptime(sublist[-1][key], "%Y-%m-%d")) or \
+               (not is_date and arr[i][key] >= sublist[-1][key]):
+                sublist.append(arr.pop(i))
+            else:
+                i += 1
+        result = merge_sorted(result, sublist, key, is_date)
+    return result
+
+def merge_sorted(arr1, arr2, key, is_date=False):
+    result = []
+    i = j = 0
+    while i < len(arr1) and j < len(arr2):
+        if (is_date and datetime.strptime(arr1[i][key], "%Y-%m-%d") <= datetime.strptime(arr2[j][key], "%Y-%m-%d")) or \
+           (not is_date and arr1[i][key] <= arr2[j][key]):
+            result.append(arr1[i])
+            i += 1
+        else:
+            result.append(arr2[j])
+            j += 1
+    result.extend(arr1[i:])
+    result.extend(arr2[j:])
+    return result
+
+
+# Shell Sort for Flag Description
+def shell_sort_flag_description(arr):
+    n = len(arr)
+    gap = n // 2
+    while gap > 0:
+        for i in range(gap, n):
+            temp = arr[i]
+            j = i
+            while j >= gap and FLAG_DESCRIPTION_ORDER.index(
+                    arr[j - gap]["Flag Description"]) > FLAG_DESCRIPTION_ORDER.index(temp["Flag Description"]):
+                arr[j] = arr[j - gap]
+                j -= gap
+            arr[j] = temp
+        gap //= 2
+    return arr
+# add a new crop entry
+def add_crop():
+    local_name = input("Enter local name: ")
+
+    print("Choose category:")
+    for idx, category in enumerate(CATEGORY_ORDER, start=1):
+        print(f"{idx}. {category}")
+    category_choice = int(input("Enter category number: "))
+    category = CATEGORY_ORDER[category_choice - 1] if 1 <= category_choice <= len(CATEGORY_ORDER) else "Unknown"
+
+    print("Choose seasonality:")
+    for idx, season in enumerate(SEASONALITY_ORDER, start=1):
+        print(f"{idx}. {season}")
+    season_choice = int(input("Enter seasonality number: "))
+    seasonality = SEASONALITY_ORDER[season_choice - 1] if 1 <= season_choice <= len(SEASONALITY_ORDER) else "Unknown"
+
+    print("Choose flag description:")
+    for idx, flag in enumerate(FLAG_DESCRIPTION_ORDER, start=1):
+        print(f"{idx}. {flag}")
+    flag_choice = int(input("Enter flag description number: "))
+    flag_description = FLAG_DESCRIPTION_ORDER[flag_choice - 1] if 1 <= flag_choice <= len(FLAG_DESCRIPTION_ORDER) else "Unknown"
+
+    crop = {
+        "Local Name": local_name,
+        "Category": category,
+        "Seasonality": seasonality,
+        "Item Code": int(input("Enter item code (integer): ")),
+        "Year": input("Enter year (YYYY): "),
+        "Flag Description": flag_description,
+        "Harvest Date": input("Enter harvest date (YYYY-MM-DD): "),
+        "Quantity": int(input("Enter quantity: "))
+    }
+    crop_inventory.append(crop)
+    print("Crop added successfully!")
+
+# display all crops with sorting option
+def display_crops():
+    if not crop_inventory:
+        print("No crops in inventory.")
+        return
+
+    print("\n--- Sort By ---")
+    print("1. Local Name (Alphabetical - Timsort)")
+    print("2. Category (Enum Order)")
+    print("3. Seasonality (Enum Order)")
+    print("4. Item Code (Integer)")
+    print("5. Year (Date)")
+    print("6. Flag Description (Enum Order)")
+    print("7. Harvest Date (Date)")
+    print("8. Quantity (Integer)")
+
+    choice = input("Choose sorting option (1-8): ")
+
+    if choice == "1":
+        timsort(crop_inventory, "Local Name")
+        sorted_crops = crop_inventory
+    elif choice == "2":
+        sorted_crops = pigeonhole_sort_category(crop_inventory)
+    elif choice == "3":
+        sorted_crops = bingo_sort_seasonality(crop_inventory)
+    elif choice == "4":
+        sorted_crops = selection_sort_item_code(crop_inventory)
+    elif choice == "5":
+        sorted_crops = strand_sort(crop_inventory.copy(), "Year")
+    elif choice == "6":
+        sorted_crops = shell_sort_flag_description(crop_inventory)
+    elif choice == "7":
+        sorted_crops = strand_sort(crop_inventory.copy(), "Harvest Date", is_date=True)
+    elif choice == "8":
+        timsort(crop_inventory, "Quantity")
+        sorted_crops = crop_inventory
+    else:
+        print("Invalid choice. Displaying unsorted crops.")
+        sorted_crops = crop_inventory
+
+    # Select which details to display
+    print("\n--- Display Options ---")
+    print("1. Show All Details")
+    print("2. Choose Custom Fields")
+    display_choice = input("Choose display option (1-2): ")
+
+    # Define a function to print selected fields
+    def print_crop(crop, fields=None):
+        if fields:
+            for field in fields:
+                print(f"{field}: {crop.get(field, 'N/A')}")
+        else:
+            for key, value in crop.items():
+                print(f"{key}: {value}")
+
+    if display_choice == "1":
+        fields_to_show = None  # Show all details
+    elif display_choice == "2":
+        # Enumerate available fields and prompt user to select
+        available_fields = list(crop_inventory[0].keys())
+        print("\nAvailable fields:")
+        for idx, field in enumerate(available_fields, start=1):
+            print(f"{idx}. {field}")
+
+        field_indices = input("Enter field numbers to display, separated by commas: ").split(",")
+        fields_to_show = [available_fields[int(index.strip()) - 1] for index in field_indices if
+                          index.strip().isdigit() and 1 <= int(index.strip()) <= len(available_fields)]
+    else:
+        print("Invalid choice. Displaying all details by default.")
+        fields_to_show = None
+
+    for i, crop in enumerate(sorted_crops, start=1):
+        print(f"\nCrop {i}:")
+        print_crop(crop, fields_to_show)
+
+
+# edit a crop entry
+def edit_crop():
+    display_crops()
+    index = int(input("\nEnter the crop number you want to edit: ")) - 1
+    if 0 <= index < len(crop_inventory):
+        crop = crop_inventory[index]
+        print("Enter new values (leave blank to keep current value):")
+        for key in crop:
+            new_value = input(f"{key} ({crop[key]}): ")
+            if new_value:
+                if key in ["Item Code", "Quantity"]:
+                    crop[key] = int(new_value)
+                elif key in ["Year", "Harvest Date"]:
+                    crop[key] = new_value
+                else:
+                    crop[key] = new_value
+        print("Crop updated successfully!")
+    else:
+        print("Invalid crop number.")
+
+
+# delete a crop entry
+def delete_crop():
+    display_crops()
+    index = int(input("\nEnter the crop number you want to delete: ")) - 1
+    if 0 <= index < len(crop_inventory):
+        crop_inventory.pop(index)
+        print("Crop deleted successfully!")
+    else:
+        print("Invalid crop number.")
+
+
+# main menu function
+def main_menu():
+    while True:
+        print("\n--- Crop Inventory System ---")
+        
+        # Ask user if they want to add a crop
+        add_crop_choice = input("Do you want to add a new crop? (y/n): ").strip().lower()
+        if add_crop_choice == 'y':
+            add_crop()
+
+        print("1. Display Crops")
+        print("2. Edit Crop")
+        print("3. Delete Crop")
+        print("4. Exit")
+        choice = input("Enter your choice: ")
+
+        if choice == "1":
+            display_crops()
+        elif choice == "2":
+            edit_crop()
+        elif choice == "3":
+            delete_crop()
+        elif choice == "4":
+            print("Exiting the program.")
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+# main menu
+if __name__ == "__main__":
+    main_menu()
