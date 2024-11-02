@@ -1,11 +1,31 @@
 from flask import Flask, jsonify, request
-from inventory_module import crop_inventory, add_crop, delete_crop, edit_crop, display_crops
+from inventory_module import crop_inventory, CATEGORY_ORDER, SEASONALITY_ORDER, FLAG_DESCRIPTION_ORDER
 
 app = Flask(__name__)
 
 @app.route('/crops', methods=['GET'])
 def get_crops():
     return jsonify(crop_inventory)
+
+@app.route('/categories', methods=['GET'])
+def get_categories():
+    return jsonify([category.value for category in CATEGORY_ORDER])  # Return enum values
+
+@app.route('/seasonality', methods=['GET'])
+def get_seasonality():
+    return jsonify([season.value for season in SEASONALITY_ORDER])  # Return enum values
+
+@app.route('/flag-descriptions', methods=['GET'])
+def get_flag_descriptions():
+    return jsonify([flag.value for flag in FLAG_DESCRIPTION_ORDER])  # Return enum values
+
+@app.route('/dropdown-options', methods=['GET'])
+def dropdown_options():
+    return jsonify({
+        "categories": [category.value for category in CATEGORY_ORDER],  # Return string values
+        "seasonality": [season.value for season in SEASONALITY_ORDER],  # Return string values
+        "flag_descriptions": [flag.value for flag in FLAG_DESCRIPTION_ORDER]  # Return string values
+    })
 
 @app.route('/crops', methods=['POST'])
 def add_new_crop():
@@ -34,7 +54,7 @@ def delete_existing_crop(index):
 def edit_existing_crop(index):
     if 0 <= index < len(crop_inventory):
         data = request.json
-        crop_inventory[index].update(data)
+        crop_inventory[index].update(data)  # Update the crop with new data
         return jsonify({"message": "Crop updated successfully"})
     return jsonify({"error": "Crop not found"}), 404
 
