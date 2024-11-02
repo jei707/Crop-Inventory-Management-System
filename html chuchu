@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Inventory System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Crop Inventory System</h1>
+
+        <!-- Button to Add Crop -->
+        <button id="toggle-add-crop-form">Add New Crop</button>
+
+        <!-- Form for Adding a Crop -->
+        <div id="add-crop-form" style="display:none;">
+            <h2>Add Crop</h2>
+            <input type="text" id="localName" placeholder="Local Name" required>
+            <select id="category" required>
+                <option value="" disabled selected>Select Category</option>
+                <option value="Vegetables">Vegetables</option>
+                <option value="Fruits">Fruits</option>
+                <option value="Fibre Crop">Fibre Crop</option>
+                <option value="Nut">Nut</option>
+                <option value="Root and Tuber">Root and Tuber</option>
+                <option value="Stimulant">Stimulant</option>
+                <option value="Tobacco">Tobacco</option>
+                <option value="Pulse">Pulse</option>
+                <option value="Oil Crop">Oil Crop</option>
+            </select>
+            <select id="seasonality" required>
+                <option value="" disabled selected>Select Seasonality</option>
+                <option value="Wet">Wet</option>
+                <option value="Dry">Dry</option>
+                <option value="Wet and Dry">Wet and Dry</option>
+            </select>
+            <input type="number" id="itemCode" placeholder="Item Code" required>
+            <input type="text" id="year" placeholder="Year" required>
+            <select id="flagDescription" required>
+                <option value="" disabled selected>Select Flag Description</option>
+                <option value="Organic">Organic</option>
+                <option value="Non-GMO">Non-GMO</option>
+                <option value="Hybrid">Hybrid</option>
+                <option value="Heirloom">Heirloom</option>
+            </select>
+            <input type="date" id="harvestDate" required>
+            <input type="number" id="quantity" placeholder="Quantity" required>
+            <button onclick="addCrop()">Add Crop</button>
+        </div>
+
+        <!-- Sort By Dropdown -->
+        <div id="sort-options">
+            <h2>Sort By:</h2>
+            <select id="sortBy" onchange="sortCrops()">
+                <option value="localName">Local Name</option>
+                <option value="category">Category</option>
+                <option value="seasonality">Seasonality</option>
+                <option value="itemCode">Item Code</option>
+                <option value="year">Year</option>
+                <option value="flagDescription">Flag Description</option>
+                <option value="harvestDate">Harvest Date</option>
+                <option value="quantity">Quantity</option>
+            </select>
+        </div>
+
+        <!-- Table to Display Crops -->
+        <div id="crop-table">
+            <h2>Crop List</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Local Name</th>
+                        <th>Category</th>
+                        <th>Seasonality</th>
+                        <th>Item Code</th>
+                        <th>Year</th>
+                        <th>Flag Description</th>
+                        <th>Harvest Date</th>
+                        <th>Quantity</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="crop-list">
+                    <!-- Crop entries will be populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // JavaScript to toggle the visibility of the add crop form
+        document.getElementById('toggle-add-crop-form').addEventListener('click', function() {
+            var form = document.getElementById('add-crop-form');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        });
+
+        // Function to add crop
+        function addCrop() {
+            var localName = document.getElementById('localName').value;
+            var category = document.getElementById('category').value;
+            var seasonality = document.getElementById('seasonality').value;
+            var itemCode = document.getElementById('itemCode').value;
+            var year = document.getElementById('year').value;
+            var flagDescription = document.getElementById('flagDescription').value;
+            var harvestDate = document.getElementById('harvestDate').value;
+            var quantity = document.getElementById('quantity').value;
+
+            // Create a new row in the crop list
+            var table = document.getElementById('crop-list');
+            var newRow = table.insertRow();
+            newRow.innerHTML = `<td>${localName}</td>
+                                <td>${category}</td>
+                                <td>${seasonality}</td>
+                                <td>${itemCode}</td>
+                                <td>${year}</td>
+                                <td>${flagDescription}</td>
+                                <td>${harvestDate}</td>
+                                <td>${quantity}</td>
+                                <td><button onclick="deleteCrop(this)">Delete</button></td>`;
+
+            // Clear input fields
+            document.getElementById('add-crop-form').reset();
+        }
+
+        // Function to delete a crop row
+        function deleteCrop(button) {
+            var row = button.parentNode.parentNode; // Get the row of the button
+            row.parentNode.removeChild(row); // Remove the row from the table
+        }
+
+        // Function to sort crops
+        function sortCrops() {
+            var table = document.getElementById("crop-list");
+            var rows = Array.from(table.rows);
+            var sortBy = document.getElementById("sortBy").value;
+
+            rows.sort(function(a, b) {
+                var cellA = a.cells[sortByIndex(sortBy)].innerText.toLowerCase();
+                var cellB = b.cells[sortByIndex(sortBy)].innerText.toLowerCase();
+                return cellA.localeCompare(cellB);
+            });
+
+            // Clear the table and append sorted rows
+            table.innerHTML = "";
+            rows.forEach(function(row) {
+                table.appendChild(row);
+            });
+        }
+
+        // Helper function to map sortBy value to table column index
+        function sortByIndex(sortBy) {
+            switch (sortBy) {
+                case 'localName': return 0;
+                case 'category': return 1;
+                case 'seasonality': return 2;
+                case 'itemCode': return 3;
+                case 'year': return 4;
+                case 'flagDescription': return 5;
+                case 'harvestDate': return 6;
+                case 'quantity': return 7;
+                default: return 0;
+            }
+        }
+    </script>
+</body>
+</html>
