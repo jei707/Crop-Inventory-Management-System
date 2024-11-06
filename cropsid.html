@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>CropWise: Crops Identification</title>
+        <style>
+            /* General Reset */
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                font-family: Arial, sans-serif;
+            }
+    
+            /* Body Styling */
+            body {
+                background-color: #e7f3e7;
+                color: #2e4d2e;
+                padding: 20px;
+            }
+    
+            /* Header */
+            h1 {
+                color: #2d572d;
+                text-align: center;
+                margin-bottom: 20px;
+            }
+    
+            /* Sort Options */
+            #sort-options {
+                margin-bottom: 20px;
+                text-align: center;
+            }
+    
+            #sort-options h2 {
+                display: inline-block;
+                margin-right: 10px;
+                color: #3e6b3e;
+            }
+    
+            #sort-options select {
+                padding: 8px;
+                border: 2px solid #2d572d;
+                border-radius: 5px;
+                background-color: #ffffff;
+                color: #2e4d2e;
+                cursor: pointer;
+                font-size: 1rem;
+            }
+    
+            /* Table Styling */
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                background-color: #f5fbf5;
+                box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+                margin: 0 auto;
+            }
+    
+            th, td {
+                padding: 12px 15px;
+                text-align: center;
+            }
+    
+            thead {
+                background-color: #3e6b3e;
+                color: #ffffff;
+            }
+    
+            tbody tr:nth-child(even) {
+                background-color: #e0f0e0;
+            }
+    
+            tbody tr:hover {
+                background-color: #d1e7d1;
+            }
+    
+            th {
+                font-size: 1.1rem;
+            }
+    
+            /* Button Styling */
+            button {
+                background-color: #3e6b3e;
+                color: #ffffff;
+                border: none;
+                padding: 8px 12px;
+                cursor: pointer;
+                border-radius: 5px;
+                transition: background-color 0.3s;
+            }
+    
+            button:hover {
+                background-color: #2d572d;
+            }
+    
+            /* Responsive Design */
+            @media (max-width: 600px) {
+                th, td {
+                    font-size: 0.9rem;
+                    padding: 10px;
+                }
+    
+                #sort-options h2, #sort-options select {
+                    font-size: 0.9rem;
+                }
+            }
+        </style>
+    </head>
+<body>
+    <h1>Crops Identification</h1>
+     <!-- Sort By Dropdown -->
+     <div id="sort-options">
+        <h2>Sort By:</h2>
+        <select id="sortBy" onchange="sortCrops()">
+            <option value="localName">Local Name</option>
+            <option value="category">Category</option>
+            <option value="seasonality">Seasonality</option>
+            <option value="itemCode">Item Code</option>
+            <option value="year">Year</option>
+            <option value="flagDescription">Flag Description</option>
+            <option value="harvestDate">Harvest Date</option>
+            <option value="quantity">Quantity</option>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Function to sort crops
+        function sortCrops() {
+            var table = document.getElementById("crop-list");
+            var rows = Array.from(table.rows);
+            var sortBy = document.getElementById("sortBy").value;
+
+            rows.sort(function(a, b) {
+                var cellA = a.cells[sortByIndex(sortBy)].innerText.toLowerCase();
+                var cellB = b.cells[sortByIndex(sortBy)].innerText.toLowerCase();
+                return cellA.localeCompare(cellB);
+            });
+
+            // Clear the table and append sorted rows
+            table.innerHTML = "";
+            rows.forEach(function(row) {
+                table.appendChild(row);
+            });
+        }
+
+        // Helper function to map sortBy value to table column index
+        function sortByIndex(sortBy) {
+            switch (sortBy) {
+                case 'localName': return 0;
+                case 'category': return 1;
+                case 'seasonality': return 2;
+                case 'itemCode': return 3;
+                case 'year': return 4;
+                case 'flagDescription': return 5;
+                case 'harvestDate': return 6;
+                case 'quantity': return 7;
+                default: return 0;
+            }
+        }
+    </script>
+ <table>
+    <thead>
+        <tr>
+            <th>Local Name</th>
+            <th>Category</th>
+            <th>Seasonality</th>
+            <th>Item Code</th>
+            <th>Year</th>
+            <th>Flag Description</th>
+            <th>Harvest Date</th>
+            <th>Quantity</th>
+        </tr>
+    </thead>
+    <tbody id="crop-list">
+        <!-- Crop entries will be populated here -->
+    </tbody>
+</table>
+
+<script>
+    // Function to display crops from localStorage
+    window.onload = function() {
+        // Retrieve crops data from localStorage and parse it
+        var crops = JSON.parse(localStorage.getItem('crops')) || [];
+
+        // Check if there are crops to display
+        if (crops.length === 0) {
+            console.log("No crops data found.");
+            return;
+        }
+
+        // Populate the table with crop data
+        var table = document.getElementById('crop-list');
+        crops.forEach(function(crop) {
+            var newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>${crop.localName || ''}</td>
+                <td>${crop.category || ''}</td>
+                <td>${crop.seasonality || ''}</td>
+                <td>${crop.itemCode || ''}</td>
+                <td>${crop.year || ''}</td>
+                <td>${crop.flagDescription || ''}</td>
+                <td>${crop.harvestDate || ''}</td>
+                <td>${crop.quantity || ''}</td>`;
+            
+            table.appendChild(newRow);
+        });
+    };
+</script>
+</body>
+</html>
