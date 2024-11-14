@@ -36,7 +36,7 @@
     <div class="container">
         <button id="toggle-add-crop-form">+ New Crop</button>
 
-        <div id="add-crop-form" style="display:none;">
+        <form id="add-crop-form" style="display:none;">
             <h2>Add Crop</h2>
             <input type="text" id="localName" placeholder="Local Name" required>
             <select id="category" required>
@@ -66,8 +66,8 @@
             </select>
             <input type="date" id="harvestDate" required>
             <input type="number" id="quantity" placeholder="Quantity" required>
-            <button onclick="addCrop()">Add/Update Crop</button>
-        </div>
+            <button type="button" onclick="addCrop()">Add/Update Crop</button>
+        </form>
 
         <div class="search-bar">
             <input type="text" id="search-input" placeholder="Search for crops..." onkeyup="search()">
@@ -114,57 +114,168 @@
     </div>
 
     <script>
-        let crops = [];
+        let crops = [];  // Keep track of crops data locally
         let editIndex = null;
-        let itemCodeMap = {}; // Map to store Item Code based on Local Name
+        let itemCodeMap = {};  // Map to store Item Code based on Local Name
 
-        document.getElementById('toggle-add-crop-form').addEventListener('click', function() {
-            var form = document.getElementById('add-crop-form');
-            form.style.display = form.style.display === 'none' ? 'block' : 'none';
-        });
+        // Fetch and display crops when page loads or after adding a crop
+        function fetchAndDisplayCrops() {
+            // Fetch crops from the backend or use the local crops array
+            fetch('/get_crops')
+                .then(response => response.json())
+                .then(data => {
+                    crops = data;  // Update the crops array with the new data
+                    displayCrops(crops);  // Display the crops in the table
+                })
+                .catch(error => console.error('Error fetching crops:', error));
+        }
 
+        // Add new crop
         function addCrop() {
-            var localName = document.getElementById('localName').value;
-            var category = document.getElementById('category').value;
-            var seasonality = document.getElementById('seasonality').value;
-            var flagDescription = document.getElementById('flagDescription').value;
-            var harvestDate = document.getElementById('harvestDate').value;
-            var quantity = document.getElementById('quantity').value;
+            const localName = document.getElementById('localName').value;
+            const category = document.getElementById('category').value;
+            const seasonality = document.getElementById('seasonality').value;
+            const flagDescription = document.getElementById('flagDescription').value;
+            const harvestDate = document.getElementById('harvestDate').value;
+            const quantity = document.getElementById('quantity').value;
 
-            // Assign Item Code based on Local Name, if it doesn't already exist
-            let itemCode = itemCodeMap[localName];
-            if (!itemCode) {
-                itemCode = Object.keys(itemCodeMap).length + 1; // Generate unique Item Code
-                itemCodeMap[localName] = itemCode;
-            }
+            // Create the crop object
+            const crop = {
+                localName,
+                category,
+                seasonality,
+                flagDescription,
+                harvestDate,
+                quantity
+            };
 
-            if (editIndex !== null) {
-                crops[editIndex] = {
-                    localName,
-                    category,
-                    seasonality,
-                    itemCode,
-                    flagDescription,
-                    harvestDate,
-                    quantity
-                };
-                editIndex = null; // Reset edit index
-            } else {
-                crops.push({
-                    localName,
-                    category,
-                    seasonality,
-                    itemCode,
-                    flagDescription,
-                    harvestDate,
-                    quantity
-                });
-            }
+            // Send the crop data to the server
+            fetch('/add_crop', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(crop)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Fetch and display updated crops after adding the new crop
+                    fetchAndDisplayCrops();
+                } else {
+                    alert('Failed to add crop.');
+                }
+            })
+            .catch(error => {
+                console.error('Error adding crop:', error);
+                alert('Error adding crop.');
+            });
 
-            displayCrops(crops);
+            // Optionally, reset the form and hide it after submission
             document.getElementById('add-crop-form').reset();
             document.getElementById('add-crop-form').style.display = 'none';
         }
+        function sortCrops() {
+    const sortBy = document.getElementById('sortBy').value;
+    const sortOrder = document.getElementById('sortOrder').value;
+
+    // Send a request to the Flask backend to get the sorted crops
+            fetch('/sort_crops', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    sortBy: sortBy,
+                    sortOrder: sortOrder
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Update the crop list with the sorted data
+                displayCrops(data);
+            })
+            .catch(error => {
+                console.error('Error sorting crops:', error);
+            });
+        }
+
+
+        // Display crops in the table
+        function displayCrops(crops) {
+            const cropList = document.getElementById("crop-list");
+            cropList.innerHTML = "";  // Clear the existing table rows before adding new ones
+
+            if (Array.isArray(crops)) {
+                crops.forEach((crop, index) => {
+                    const cropRow = document.createElement("tr");
+                    cropRow.innerHTML = `
+                        <td>${crop.itemCode || ''}</td>
+                        <td>${crop.localName || ''}</td>
+                        <td>${crop.category || ''}</td>
+                        <td>${crop.seasonality || ''}</td>
+                        <td>${crop.flagDescription || ''}</td>
+                        <td>${crop.harvestDate || ''}</td>
+                        <td>${crop.quantity || ''}</td>
+                        <td>
+                            <button onclick="editCrop(${index})">Edit</button>
+                            <button onclick="deleteCrop(${index})">Delete</button>
+                        </td>
+                    `;
+                    cropList.appendChild(cropRow);
+                });
+            } else {
+                console.error("Data is not an array:", crops);
+            }
+        }
+
+        // Edit crop function
+        function editCrop(index) {
+            const crop = crops[index];
+            document.getElementById('localName').value = crop.localName;
+            document.getElementById('category').value = crop.category;
+            document.getElementById('seasonality').value = crop.seasonality;
+            document.getElementById('flagDescription').value = crop.flagDescription;
+            document.getElementById('harvestDate').value = crop.harvestDate;
+            document.getElementById('quantity').value = crop.quantity;
+
+            editIndex = index;
+            document.getElementById('add-crop-form').style.display = 'block';
+        }
+
+        // Delete crop function
+        function deleteCrop(index) {
+            crops.splice(index, 1);  // Remove the crop from the array
+            displayCrops(crops);  // Re-render the table
+        }
+
+        // Search function
+        function search() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const filteredCrops = crops.filter(crop => {
+                return crop.localName.toLowerCase().includes(searchTerm) ||
+                    crop.category.toLowerCase().includes(searchTerm) ||
+                    crop.seasonality.toLowerCase().includes(searchTerm) ||
+                    crop.itemCode.toString().includes(searchTerm) ||
+                    crop.flagDescription.toLowerCase().includes(searchTerm) ||
+                    crop.harvestDate.toLowerCase().includes(searchTerm) ||
+                    crop.quantity.toString().includes(searchTerm);
+            });
+            displayCrops(filteredCrops);  // Display the filtered crops
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // Fetch crops when the page is loaded
+            fetchAndDisplayCrops();
+
+            // Event listener for the add crop button
+            document.getElementById('toggle-add-crop-form').addEventListener('click', function() {
+                const form = document.getElementById('add-crop-form');
+                form.style.display = form.style.display === 'none' ? 'block' : 'none';
+            });
+        });
+
+                
 
         function editCrop(index) {
             const crop = crops[index];
@@ -179,50 +290,8 @@
             document.getElementById('add-crop-form').style.display = 'block';
         }
 
-        function sortCrops() {
-            const sortBy = document.getElementById("sortBy").value;
-            const sortOrder = document.getElementById("sortOrder").value;
-            const isDescending = sortOrder === "descending";
+        
 
-            crops.sort((a, b) => {
-                let valA = a[sortBy];
-                let valB = b[sortBy];
-
-                if (typeof valA === 'string') {
-                    valA = valA.toLowerCase();
-                    valB = valB.toLowerCase();
-                }
-
-                if (valA < valB) return isDescending ? 1 : -1;
-                if (valA > valB) return isDescending ? -1 : 1;
-                return 0;
-            });
-
-            displayCrops(crops);
-        }
-
-        function displayCrops(crops) {
-            const cropList = document.getElementById("crop-list");
-            cropList.innerHTML = "";
-
-            crops.forEach((crop, index) => {
-                const cropRow = document.createElement("tr");
-                cropRow.innerHTML = `
-                    <td>${crop.itemCode || ''}</td> <!-- Item Code is now first -->
-                    <td>${crop.localName || ''}</td>
-                    <td>${crop.category || ''}</td>
-                    <td>${crop.seasonality || ''}</td>
-                    <td>${crop.flagDescription || ''}</td>
-                    <td>${crop.harvestDate || ''}</td>
-                    <td>${crop.quantity || ''}</td>
-                    <td>
-                        <button onclick="editCrop(${index})">Edit</button>
-                        <button onclick="deleteCrop(this)">Delete</button>
-                    </td>
-                `;
-                cropList.appendChild(cropRow);
-            });
-        }
 
         function deleteCrop(button) {
             var row = button.parentNode.parentNode;
