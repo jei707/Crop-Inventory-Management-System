@@ -78,10 +78,10 @@
             <div id="sort-options" class="sort-by-dropdown">
                 <h4>Sort By:</h4>
                 <select id="sortBy" onchange="sortCrops()">
+                    <option value="itemCode">Item Code</option>
                     <option value="localName">Local Name</option>
                     <option value="category">Category</option>
                     <option value="seasonality">Seasonality</option>
-                    <option value="itemCode">Item Code</option>
                     <option value="flagDescription">Flag Description</option>
                     <option value="harvestDate">Harvest Date</option>
                     <option value="quantity">Quantity</option>
@@ -96,10 +96,10 @@
             <table>
                 <thead>
                     <tr>
+                        <th>Item Code</th>
                         <th>Local Name</th>
                         <th>Category</th>
                         <th>Seasonality</th>
-                        <th>Item Code</th>
                         <th>Flag Description</th>
                         <th>Harvest Date</th>
                         <th>Quantity</th>
@@ -208,10 +208,10 @@
             crops.forEach((crop, index) => {
                 const cropRow = document.createElement("tr");
                 cropRow.innerHTML = `
+                    <td>${crop.itemCode || ''}</td> <!-- Item Code is now first -->
                     <td>${crop.localName || ''}</td>
                     <td>${crop.category || ''}</td>
                     <td>${crop.seasonality || ''}</td>
-                    <td>${crop.itemCode || ''}</td>
                     <td>${crop.flagDescription || ''}</td>
                     <td>${crop.harvestDate || ''}</td>
                     <td>${crop.quantity || ''}</td>
