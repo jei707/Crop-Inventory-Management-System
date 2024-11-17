@@ -44,13 +44,132 @@
             <li><a href="/">Home</a></li>
             <li><a href="/loggedout">Crop Inventory</a></li> <!-- Link to crop inventory (which is handled in JS) -->
             <li><a href="#Harvest-Management">Harvest Management</a></li>
+            <li><a href="/contact">Contact Us</a></li>
+            
         </ul>
     </div>
 
-    <div class="container">
-        <h2>Welcome!</h2>
-        
-    </div>
+    <section class="hero">
+        <h1>Manage crop farming efficiently. CropWise can help.</h1>
+        <p>
+         Managing your crops has never been easier. Keep track of harvest dates, quantities, seasonal categories, and more—all in one place. Whether you're a seasoned farmer or just starting out, this tool is designed to simplify your work and help you focus on what you do best: growing great crops.
+        </p>
 
+        <div class="card-container">
+          <div class="card">
+            <img src="../static/inventory_logo.png" alt="Crop Inventory Logo" class="card-logo">
+            <h2>Crop Inventory</h2>
+            <p> Manage your crops efficiently and effectively with a crop inventory system, a powerful tool designed to streamline agricultural operations.</p>
+          
+          </div>
+          <div class="card">
+            <img src="../static/management_logo.png" alt="Harvest Management Logo" class="card-logo">
+            <h2>Harvest Management</h2>
+            <p>Quickly view an overview of total crops, quantities, and harvest timelines, helping you stay on top of your agricultural operations with ease.</p>
+            
+          </div>
+        
+          <div class="card">
+            <img src="../static/contact_logo.png" alt="Contact Us Logo" class="card-logo">
+            <h2>Contact Us</h2>
+            <a href="/contact">
+                <button>Learn more</button>
+              </a>
+           
+          </div>
+        </div>
+      </section>
+
+    <style>
+        /* styles.css */
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f9f9f9;
+}
+
+.hero {
+  text-align: center;
+  padding: 50px 20px;
+}
+
+.hero h1 {
+  font-size: 2.5rem;
+  color: #00ba10;
+}
+
+.hero p {
+  font-size: 1.10rem;
+  color: #333;
+  margin: 20px 0;
+  max-width: 75%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.card-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 50px;
+  margin-top: 60px;
+}
+
+.card {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 350px; /* Increased width */
+  height: 300px; /* Added height to make cards bigger */
+  text-align: center;
+  overflow: hidden;
+  padding: 15px; /* Added padding for better spacing inside the card */
+}
+
+.card:hover {
+  transform: scale(1.2); /* Enlarge logo on hover */
+}
+
+.card-logo {
+  width: 50px; /* Initial width of the logo */
+  height: 50px; /* Initial height of the logo */
+  margin: 5px auto; /* Reduced vertical margin for less spacing */
+  transition: transform 0.3s ease; /* Smooth hover effect */
+}
+
+.card h2 {
+  font-size: 1.5rem; /* Increased font size */
+  margin: 10px 10px; /* Reduced margin for better spacing */
+  color: #333;
+}
+
+.card p {
+  font-size: .90rem;
+  color: #333;
+  margin: 20px 0;
+  max-width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.card button {
+  background-color: #00ba10;
+  color: white;
+  border: none;
+  padding: 15px 20px; /* Increased padding */
+  margin: 10px 0;
+  border-radius: 20px;
+  font-size: 1rem; /* Increased font size */
+  cursor: pointer;
+}
+.card button:hover {
+  background-color: #00ba10;
+}
+
+
+
+    </style>
 </body>
 </html>
