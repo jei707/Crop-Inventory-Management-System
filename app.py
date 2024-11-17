@@ -3,6 +3,10 @@ from datetime import datetime
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
+import matplotlib.pyplot as plt
+import io
+import base64
+from matplotlib.ticker import MaxNLocator
 
 # Flask application setup
 app = Flask(__name__)
@@ -180,5 +184,14 @@ def login():
 def loginsuccessful():
     return render_template('loginsuccessful.html')
 
+@app.route('/contact')
+def contact():
+    return render_template('contact.html')
+
+@app.route('/profile')
+def profile():
+    return render_template('profile.html')
+
 if __name__ == '__main__':
     app.run(debug=True)
+    
