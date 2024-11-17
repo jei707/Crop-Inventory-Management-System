@@ -4,7 +4,6 @@ from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
 
-
 # Flask application setup
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///crops.db'  # SQLite database
@@ -54,20 +53,34 @@ def get_crops():
 def add_crop():
     try:
         crop_data = request.json
-        item_code = generate_item_code()  # Generate unique item code
+        # Check if it's an update or new crop
+        if 'id' in crop_data:  # Update existing crop
+            crop = Crop.query.get(crop_data['id'])
+            if not crop:
+                return jsonify({"error": "Crop not found"}), 404
+        else:  # Adding new crop
+            crop = Crop(
+                local_name=crop_data['localName'],
+                category=crop_data['category'],
+                seasonality=crop_data['seasonality'],
+                flag_description=crop_data['flagDescription'],
+                harvest_date=datetime.strptime(crop_data['harvestDate'], "%Y-%m-%d"),
+                quantity=crop_data['quantity'],
+                item_code=generate_item_code()  # Generate unique item code for new crop
+            )
+            db.session.add(crop)
 
-        crop = Crop(
-            local_name=crop_data['localName'],
-            category=crop_data['category'],
-            seasonality=crop_data['seasonality'],
-            flag_description=crop_data['flagDescription'],
-            harvest_date=datetime.strptime(crop_data['harvestDate'], "%Y-%m-%d"),
-            quantity=crop_data['quantity'],
-            item_code=item_code  # Include the item code
-        )
-        db.session.add(crop)
+        # Update the crop data (either new or edited)
+        crop.local_name = crop_data['localName']
+        crop.category = crop_data['category']
+        crop.seasonality = crop_data['seasonality']
+        crop.flag_description = crop_data['flagDescription']
+        crop.harvest_date = datetime.strptime(crop_data['harvestDate'], "%Y-%m-%d")
+        crop.quantity = crop_data['quantity']
+
         db.session.commit()
-        return jsonify({"success": True, "itemCode": item_code}), 201
+
+        return jsonify({"success": True, "itemCode": crop.item_code}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
@@ -85,14 +98,14 @@ def delete_crop(item_code):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route('/update_crop/<int:crop_id>', methods=['PUT'])
-def update_crop(crop_id):
+@app.route('/update_crop', methods=['PUT'])
+def update_crop():
     try:
-        crop = Crop.query.get(crop_id)
+        crop_data = request.json
+        crop = Crop.query.get(crop_data['id'])
         if not crop:
             return jsonify({"error": "Crop not found"}), 404
         
-        crop_data = request.json
         crop.local_name = crop_data['localName']
         crop.category = crop_data['category']
         crop.seasonality = crop_data['seasonality']
