@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Inventory System</title>
+    <link rel="stylesheet" href="../static/style.css">
+    <style>
+        /* Styling for the label and input group */
+        .input-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+    
+        .input-group label {
+            width: 150px; /* Adjust width for proper label placement */
+            font-weight: bold;
+            margin-right: 10px;
+        }
+    
+        .input-group input,
+        .input-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    
+        .input-group textarea {
+            resize: vertical;
+        }
+    
+        /* Make fields appear as editable sections */
+        .editable {
+            display: block;
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    
+        /* Add white background to containers (fieldset, container, etc.) */
+        .container,
+        fieldset {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px; /* Add some space between the containers */
+        }
+    
+        fieldset legend {
+            font-weight: bold;
+            padding: 0 10px;
+        }
+    
+        /* Style the Save button */
+        #save-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    
+        #save-button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo-container">
+            <img src="../static/cropwise_logo.png" alt="Logo" class="logo">
+            <h1>CropWise</h1>
+        </div>
+        <ul>
+            <li class="account-dropdown">
+                <a href="#account">My Account | admin</a>
+                <div class="dropdown-content">
+                    <a href="/profile">Profile</a>
+                    <a href="#settings">Settings</a>
+                    <a href="/">Logout</a>
+                </div>
+            </li>
+        </ul>
+    </nav>
+    
+    <div class="main-nav">
+        <ul>
+            <li><a href="/home">Home</a></li>
+            <li><a href="/loginsuccessful">Crop Inventory</a></li>
+            <li><a href="#Harvest-Management">Harvest Management</a></li>
+        </ul>
+    </div>
+
+    <div class="container">
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <h2 id="form-title">Farm Profile</h2>
+        </div>
+
+        <div id="farm-profile">
+            <!-- General Information -->
+            <fieldset>
+                <legend>Farm Information</legend>
+                <div class="input-group">
+                    <label for="farmName">Farm Name:</label>
+                    <input type="text" id="farmName" class="editable" placeholder="Enter Farm Name">
+                </div>
+                <div class="input-group">
+                    <label for="farmDescription">Farm Description:</label>
+                    <textarea id="farmDescription" class="editable" placeholder="Enter Farm Description" rows="4"></textarea>
+                </div>
+                <div class="input-group">
+                    <label for="farmType">Farm Type:</label>
+                    <input type="text" id="farmType" class="editable" placeholder="Enter Farm Type (e.g., Organic, Commercial)">
+                </div>
+            </fieldset>
+
+            <!-- Location Details -->
+            <fieldset>
+                <legend>Location Details</legend>
+                <div class="input-group">
+                    <label for="address">Address:</label>
+                    <input type="text" id="address" class="editable" placeholder="Enter Address">
+                </div>
+                <div class="input-group">
+                    <label for="city">City:</label>
+                    <input type="text" id="city" class="editable" placeholder="Enter City">
+                </div>
+                <div class="input-group">
+                    <label for="state">State/Province:</label>
+                    <input type="text" id="state" class="editable" placeholder="Enter State/Province">
+                </div>
+                <div class="input-group">
+                    <label for="country">Country:</label>
+                    <input type="text" id="country" class="editable" placeholder="Enter Country">
+                </div>
+                <div class="input-group">
+                    <label for="zipCode">ZIP/Postal Code:</label>
+                    <input type="text" id="zipCode" class="editable" placeholder="Enter ZIP/Postal Code">
+                </div>
+            </fieldset>
+
+            <!-- Owner/Manager Information -->
+            <fieldset>
+                <legend>Owner/Manager</legend>
+                <div class="input-group">
+                    <label for="owner">Owner/Manager Name:</label>
+                    <input type="text" id="owner" class="editable" placeholder="Enter Owner/Manager Name">
+                </div>
+                <div class="input-group">
+                    <label for="ownerEmail">Email Address:</label>
+                    <input type="email" id="ownerEmail" class="editable" placeholder="Enter Email Address">
+                </div>
+                <div class="input-group">
+                    <label for="contact">Contact Number:</label>
+                    <input type="tel" id="contact" class="editable" placeholder="Enter Contact Number">
+                </div>
+            </fieldset>
+
+            <!-- Worker Details -->
+            <fieldset>
+                <legend>Workers</legend>
+                <div class="input-group">
+                    <label for="workers">Worker Details:</label>
+                    <textarea id="workers" class="editable" placeholder="Enter Worker Details (names, roles, contact info)" rows="4"></textarea>
+                </div>
+            </fieldset>
+
+            <!-- Additional Details -->
+            <fieldset>
+                <legend>Additional Information</legend>
+                <div class="input-group">
+                    <label for="area">Farm Area:</label>
+                    <input type="text" id="area" class="editable" placeholder="Enter Farm Area (e.g., 50 acres)">
+                </div>
+                <div class="input-group">
+                    <label for="equipment">Key Equipment:</label>
+                    <input type="text" id="equipment" class="editable" placeholder="Enter Key Equipment (e.g., Tractors)">
+                </div>
+                <div class="input-group">
+                    <label for="notes">Additional Notes:</label>
+                    <textarea id="notes" class="editable" placeholder="Enter Additional Notes" rows="4"></textarea>
+                </div>
+            </fieldset>
+
+            <button type="button" id="save-button">Save Profile</button>
+        </div>
+    </div>
+
+    <script>
+        // Load saved data from localStorage
+        function loadProfileData() {
+            document.getElementById('farmName').value = localStorage.getItem('farmName') || '';
+            document.getElementById('farmDescription').value = localStorage.getItem('farmDescription') || '';
+            document.getElementById('farmType').value = localStorage.getItem('farmType') || '';
+            document.getElementById('address').value = localStorage.getItem('address') || '';
+            document.getElementById('city').value = localStorage.getItem('city') || '';
+            document.getElementById('state').value = localStorage.getItem('state') || '';
+            document.getElementById('country').value = localStorage.getItem('country') || '';
+            document.getElementById('zipCode').value = localStorage.getItem('zipCode') || '';
+            document.getElementById('owner').value = localStorage.getItem('owner') || '';
+            document.getElementById('ownerEmail').value = localStorage.getItem('ownerEmail') || '';
+            document.getElementById('contact').value = localStorage.getItem('contact') || '';
+            document.getElementById('workers').value = localStorage.getItem('workers') || '';
+            document.getElementById('area').value = localStorage.getItem('area') || '';
+            document.getElementById('equipment').value = localStorage.getItem('equipment') || '';
+            document.getElementById('notes').value = localStorage.getItem('notes') || '';
+        }
+
+        // Save data to localStorage on button click
+        document.getElementById('save-button').addEventListener('click', function() {
+            localStorage.setItem('farmName', document.getElementById('farmName').value);
+            localStorage.setItem('farmDescription', document.getElementById('farmDescription').value);
+            localStorage.setItem('farmType', document.getElementById('farmType').value);
+            localStorage.setItem('address', document.getElementById('address').value);
+            localStorage.setItem('city', document.getElementById('city').value);
+            localStorage.setItem('state', document.getElementById('state').value);
+            localStorage.setItem('country', document.getElementById('country').value);
+            localStorage.setItem('zipCode', document.getElementById('zipCode').value);
+            localStorage.setItem('owner', document.getElementById('owner').value);
+            localStorage.setItem('ownerEmail', document.getElementById('ownerEmail').value);
+            localStorage.setItem('contact', document.getElementById('contact').value);
+            localStorage.setItem('workers', document.getElementById('workers').value);
+            localStorage.setItem('area', document.getElementById('area').value);
+            localStorage.setItem('equipment', document.getElementById('equipment').value);
+            localStorage.setItem('notes', document.getElementById('notes').value);
+            alert("Profile Saved!");
+        });
+
+        // Load profile data on page load
+        window.onload = loadProfileData;
+    </script>
+
+</body>
+</html>

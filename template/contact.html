@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Inventory System</title>
+    <link rel="stylesheet" href="../static/style.css">
+    <style>
+        /* Back Button Styles */
+        .back-button {
+            position: fixed;
+            top: 70px; /* Adjust based on navbar height */
+            left: 20px;
+            font-size: 24px;
+            color: #00ba10;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        .back-button i {
+            font-size: 1.5rem; /* Adjust size of arrow */
+        }
+
+        .back-button:hover {
+            color: #008c07;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo-container">
+            <img src="../static/cropwise_logo.png" alt="Logo" class="logo">
+            <h1>CropWise</h1>
+        </div>
+    </nav>
+
+    <!-- Back Button -->
+    <button class="back-button" onclick="window.history.back();">
+        <i>&#8592;</i> <!-- Left arrow symbol -->
+    </button>
+
+    <!-- Main Navigation Below CropWise -->
+    <div class="main-nav">
+        <!-- You can add other navigation elements here -->
+    </div>
+
+    <section id="contact">
+        <h2>Contact Us</h2>
+        <p>If you have any questions, feel free to reach out to us. We'd love to hear from you!</p>
+      
+        <!-- Contact Form -->
+        <form action="/submit-form" method="POST">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+      
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+      
+            <label for="message">Message:</label>
+            <textarea id="message" name="message" rows="4" required></textarea>
+      
+            <button type="submit">Submit</button>
+        </form>
+      
+        <!-- Additional Contact Info -->
+        <p><strong>Phone:</strong> <a href="tel:+1234567890">+1 234 567 890</a></p>
+        <p><strong>Email:</strong> <a href="mailto:contact@cropwise.com">contact@cropwise.com</a></p>
+        <p><strong>Address:</strong> <a href="Malinta, 4030 Los Baños, Laguna">Malinta, 4030 Los Baños, Laguna</a></p>
+    </section>
+
+    <style>
+    /* General Contact Us Section Styles */
+    #contact {
+        padding: 40px 20px;
+        background-color: #f9f9f9;
+        text-align: center;
+        color: #333;
+    }
+
+    #contact h2 {
+        font-size: 2rem;
+        color: #00ba10;
+        margin-bottom: 20px;
+    }
+
+    #contact p {
+        font-size: 1rem;
+        margin-bottom: 30px;
+        max-width: 80%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Contact Form Styles */
+    form {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-width: 500px;
+        margin: 0 auto;
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    form label {
+        font-size: 1rem;
+        color: #333;
+    }
+
+    form input, form textarea {
+        padding: 10px;
+        font-size: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    form textarea {
+        resize: vertical;
+    }
+
+    form button {
+        background-color: #00ba10;
+        color: white;
+        border: none;
+        padding: 15px 20px;
+        border-radius: 5px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    form button:hover {
+        background-color: #008c07;
+    }
+
+    /* Additional Contact Information Styles */
+    .contact-info {
+        margin-top: 30px;
+    }
+
+    .contact-info p {
+        font-size: 1rem;
+        margin: 10px 0;
+    }
+
+    .contact-info a {
+        color: #00ba10;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    .contact-info a:hover {
+        color: #008c07;
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+        #contact h2 {
+            font-size: 1.8rem;
+        }
+
+        form {
+            width: 90%;
+        }
+
+        .contact-info p {
+            font-size: 0.9rem;
+        }
+
+        .contact-info .social-links {
+            font-size: 1rem;
+        }
+    }
+    </style>
+
+</body>
+</html>
