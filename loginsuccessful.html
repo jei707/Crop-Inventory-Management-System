@@ -37,7 +37,7 @@
         <button id="toggle-add-crop-form">+ New Crop</button>
 
         <form id="add-crop-form" style="display:none;">
-            <h2>Add Crop</h2>
+            <h2 id="form-title">Add Crop</h2>
             <input type="text" id="localName" placeholder="Local Name" required>
             <select id="category" required>
                 <option value="" disabled selected>Select Category</option>
@@ -66,7 +66,8 @@
             </select>
             <input type="date" id="harvestDate" required>
             <input type="number" id="quantity" placeholder="Quantity" required>
-            <button type="button" onclick="addCrop()">Add/Update Crop</button>
+            <button type="button" id="add-crop-button" onclick="addCrop()">Add Crop</button>
+            <button type="button" id="update-crop-button" onclick="updateCrop()" style="display:none;">Update Crop</button>
         </form>
 
         <div class="search-bar">
@@ -128,7 +129,7 @@
                 .catch(error => console.error('Error fetching crops:', error));
         }
 
-        // Add new crop
+        // Add crop (this will now create a new crop)
         function addCrop() {
             const localName = document.getElementById('localName').value;
             const category = document.getElementById('category').value;
@@ -157,14 +158,70 @@
             .then(data => {
                 if (data.success) {
                     fetchAndDisplayCrops();  // Refresh the crop list after adding
+                    document.getElementById('add-crop-form').reset();
+                    document.getElementById('add-crop-form').style.display = 'none';
                 } else {
                     alert('Failed to add crop.');
                 }
             })
             .catch(error => console.error('Error adding crop:', error));
+        }
 
-            document.getElementById('add-crop-form').reset();
-            document.getElementById('add-crop-form').style.display = 'none';
+        // Update existing crop
+        function updateCrop() {
+            const localName = document.getElementById('localName').value;
+            const category = document.getElementById('category').value;
+            const seasonality = document.getElementById('seasonality').value;
+            const flagDescription = document.getElementById('flagDescription').value;
+            const harvestDate = document.getElementById('harvestDate').value;
+            const quantity = document.getElementById('quantity').value;
+
+            const crop = {
+                id: crops[editIndex].id,  // Include the crop ID for updating
+                localName,
+                category,
+                seasonality,
+                flagDescription,
+                harvestDate,
+                quantity
+            };
+
+            fetch('/update_crop', {
+                method: 'PUT', // Use PUT method
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(crop)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    fetchAndDisplayCrops();  // Refresh the crop list after updating
+                    document.getElementById('add-crop-form').reset();  // Clear the form
+                    document.getElementById('add-crop-form').style.display = 'none';  // Hide the form
+                    document.getElementById('add-crop-button').style.display = 'block';  // Show Add Crop button
+                    document.getElementById('update-crop-button').style.display = 'none';  // Hide Update button
+                } else {
+                    alert('Failed to update crop.');
+                }
+            })
+            .catch(error => console.error('Error updating crop:', error));
+        }
+
+        // Edit crop function (sets the form for editing)
+        function editCrop(index) {
+            const crop = crops[index];
+            document.getElementById('localName').value = crop.localName;
+            document.getElementById('category').value = crop.category;
+            document.getElementById('seasonality').value = crop.seasonality;
+            document.getElementById('flagDescription').value = crop.flagDescription;
+            document.getElementById('harvestDate').value = crop.harvestDate;
+            document.getElementById('quantity').value = crop.quantity;
+
+            editIndex = index;  // Set the index of the crop being edited
+            document.getElementById('add-crop-button').style.display = 'none';
+            document.getElementById('update-crop-button').style.display = 'block';
+            document.getElementById('add-crop-form').style.display = 'block';
         }
 
         // Sort crops
@@ -208,20 +265,6 @@
                 `;
                 cropList.appendChild(cropRow);
             });
-        }
-
-                // Edit crop function
-        function editCrop(index) {
-            const crop = crops[index];
-            document.getElementById('localName').value = crop.localName;
-            document.getElementById('category').value = crop.category;
-            document.getElementById('seasonality').value = crop.seasonality;
-            document.getElementById('flagDescription').value = crop.flagDescription;
-            document.getElementById('harvestDate').value = crop.harvestDate;
-            document.getElementById('quantity').value = crop.quantity;
-
-            editIndex = index;
-            document.getElementById('add-crop-form').style.display = 'block';
         }
 
         // Delete crop function
