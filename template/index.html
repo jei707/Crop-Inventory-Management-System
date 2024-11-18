@@ -13,10 +13,20 @@
             window.location.href = '/login';  // Redirect to login page
         }
 
-        // Event listener for the Crop Inventory link
+        // Function to handle the case when the user tries to access the Harvest Management without logging in
+        function handleHarvestManagementRedirect(event) {
+            event.preventDefault();  // Prevent default link action (navigation)
+            alert('You need to be logged in first to access Harvest Management.');
+            window.location.href = '/login';  // Redirect to login page
+        }
+
+        // Event listeners for both the Crop Inventory and Harvest Management links
         window.onload = function() {
             const cropInventoryLink = document.querySelector('a[href="/loggedout"]');
             cropInventoryLink.addEventListener('click', handleCropInventoryRedirect);
+
+            const harvestManagementLink = document.querySelector('a[href="#Harvest-Management"]');
+            harvestManagementLink.addEventListener('click', handleHarvestManagementRedirect);
         };
     </script>
 </head>
@@ -31,8 +41,6 @@
             <li class="account-dropdown">
                 <a href="#account">My Account</a>
                 <div class="dropdown-content">
-                    <a href="#profile">Profile</a>
-                    <a href="#settings">Settings</a>
                     <a href="/login">Login</a>
                 </div>
             </li>
@@ -42,17 +50,16 @@
     <div class="main-nav">
         <ul>
             <li><a href="/">Home</a></li>
-            <li><a href="/loggedout">Crop Inventory</a></li> <!-- Link to crop inventory (which is handled in JS) -->
-            <li><a href="#Harvest-Management">Harvest Management</a></li>
+            <li><a href="/loggedout">Crop Inventory</a></li> <!-- Crop Inventory link -->
+            <li><a href="#Harvest-Management">Harvest Management</a></li> <!-- Harvest Management link -->
             <li><a href="/contact">Contact Us</a></li>
-            
         </ul>
     </div>
 
     <section class="hero">
         <h1>Manage crop farming efficiently. CropWise can help.</h1>
         <p>
-         Managing your crops has never been easier. Keep track of harvest dates, quantities, seasonal categories, and more—all in one place. Whether you're a seasoned farmer or just starting out, this tool is designed to simplify your work and help you focus on what you do best: growing great crops.
+            Managing your crops has never been easier. Keep track of harvest dates, quantities, seasonal categories, and more—all in one place. Whether you're a seasoned farmer or just starting out, this tool is designed to simplify your work and help you focus on what you do best: growing great crops.
         </p>
 
         <div class="card-container">
@@ -60,25 +67,21 @@
             <img src="../static/inventory_logo.png" alt="Crop Inventory Logo" class="card-logo">
             <h2>Crop Inventory</h2>
             <p> Manage your crops efficiently and effectively with a crop inventory system, a powerful tool designed to streamline agricultural operations.</p>
-          
           </div>
           <div class="card">
             <img src="../static/management_logo.png" alt="Harvest Management Logo" class="card-logo">
             <h2>Harvest Management</h2>
             <p>Quickly view an overview of total crops, quantities, and harvest timelines, helping you stay on top of your agricultural operations with ease.</p>
-            
           </div>
-        
           <div class="card">
             <img src="../static/contact_logo.png" alt="Contact Us Logo" class="card-logo">
             <h2>Contact Us</h2>
             <a href="/contact">
                 <button>Learn more</button>
-              </a>
-           
+            </a>
           </div>
         </div>
-      </section>
+    </section>
 
     <style>
         /* styles.css */
@@ -167,9 +170,6 @@ body {
 .card button:hover {
   background-color: #00ba10;
 }
-
-
-
     </style>
 </body>
 </html>
