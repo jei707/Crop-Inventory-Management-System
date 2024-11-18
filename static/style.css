@@ -468,3 +468,26 @@ canvas {
     max-width: 100%;
     margin-top: 20px;
 }
+
+/* Add a specific class for the icons in the dropdown */
+.account-dropdown .dropdown-icon {
+    width: 20px; /* Adjust the icon size */
+    height: auto; /* Maintain aspect ratio */
+    margin-right: 10px; /* Space between the icon and the text */
+}
+
+/* Make sure the icon and text are vertically aligned */
+.account-dropdown a {
+    display: flex;
+    align-items: center; /* Vertically align the text with the icon */
+}
+
+/* Dropdown content */
+.account-dropdown .dropdown-content a {
+    display: flex;
+    align-items: center; /* Align icon and text in dropdown items */
+}
+
+.account-dropdown .dropdown-content a:hover {
+    background-color: #f1f1f1; /* Optional: Hover effect for dropdown items */
+}
