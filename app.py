@@ -6,7 +6,7 @@ from sqlalchemy import func
 import matplotlib.pyplot as plt
 import io
 import base64
-from matplotlib.ticker import MaxNLocator
+
 
 # Flask application setup
 app = Flask(__name__)
@@ -192,6 +192,45 @@ def contact():
 def profile():
     return render_template('profile.html')
 
+@app.route('/harvest_management')
+def pharvest_management():
+    return render_template('harvest_management.html')
+
+@app.route('/overview', methods=['GET'])
+def overview():
+    try:
+        # Get total number of crops
+        total_crops = Crop.query.count()
+
+        # Get total quantity of all crops
+        total_quantity = db.session.query(func.sum(Crop.quantity)).scalar() or 0
+
+        # Get harvest timelines (group by harvest month)
+        harvest_timeline = db.session.query(
+            func.strftime('%Y-%m', Crop.harvest_date),
+            func.count(Crop.id),
+            func.sum(Crop.quantity)
+        ).group_by(func.strftime('%Y-%m', Crop.harvest_date)).all()
+
+        # Process data for display
+        harvest_data = [
+            {
+                "month": datetime.strptime(month, '%Y-%m').strftime('%B %Y'),
+                "crop_count": crop_count,
+                "total_quantity": total_quantity
+            }
+            for month, crop_count, total_quantity in harvest_timeline
+        ]
+
+        # Return a JSON response with the overview data
+        return jsonify({
+            "totalCrops": total_crops,
+            "totalQuantity": total_quantity,
+            "harvestTimeline": harvest_data
+        }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
 if __name__ == '__main__':
     app.run(debug=True)
     
