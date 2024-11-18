@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Overview</title>
+    <link rel="stylesheet" href="../static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav>
+        <div class="logo-container">
+            <img src="../static/cropwise_logo.png" alt="Logo" class="logo">
+            <h1>CropWise</h1>
+        </div>
+        <ul>
+            <li class="account-dropdown">
+                <a href="#account">My Account | admin</a>
+                <div class="dropdown-content">
+                    <a href="/profile">
+                      <img src="../static/profile.png" alt="Profile Icon" class="dropdown-icon"> Profile
+                    </a>
+                    
+                    <a href="/">
+                      <img src="../static/logout.png" alt="Profile Icon" class="dropdown-icon">
+                      Logout</a>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Navigation Below CropWise -->
+    <div class="main-nav">
+        <ul>
+            <li><a href="/home">Home</a></li>
+            <li><a href="/loginsuccessful">Crop Inventory</a></li>
+            <li><a href="/harvest_management">Harvest Management</a></li>
+            <li><a href="/contact">Contact Us</a></li>
+        </ul>
+    </div>
+
+    <div class="container">
+        <h1>Crop Overview</h1>
+
+        <!-- Crop Overview Content Section -->
+        <div id="overview-container">
+            <div class="overview-summary">
+                <h2>Total Crops: <span id="total-crops"></span></h2>
+                <h2>Total Quantity: <span id="total-quantity"></span></h2>
+            </div>
+            
+            <!-- Chart Display Section -->
+            <canvas id="harvest-chart" width="400" height="200"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // Fetch overview data from the server
+        fetch('/overview')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('total-crops').textContent = data.totalCrops;
+                document.getElementById('total-quantity').textContent = data.totalQuantity;
+
+                // Prepare data for the chart
+                const labels = data.harvestTimeline.map(item => item.month);
+                const quantities = data.harvestTimeline.map(item => item.total_quantity);
+
+                // Render the chart
+                const ctx = document.getElementById('harvest-chart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Total Quantity by Month',
+                            data: quantities,
+                            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => console.error('Error fetching overview data:', error));
+    </script>
+</body>
+</html>
