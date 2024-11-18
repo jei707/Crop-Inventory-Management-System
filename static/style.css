@@ -71,7 +71,9 @@ nav ul li a:hover {
     list-style: none; /* Removes default bullet points */
     padding: 0;
     margin: 0;
-    text-align: left; /* Centers the items horizontally */
+    display: flex; /* Use flexbox for alignment */
+    justify-content: space-evenly; /* Evenly spread out the items */
+    text-align: center; /* Center-align the text */
 }
 
 .main-nav ul li {
@@ -312,4 +314,157 @@ td button:hover {
         flex-direction: column;
         align-items: flex-start;
     }
+}
+
+/* Profile Header Styling */
+.profile-header {
+    display: flex; /* Align items in a row */
+    align-items: center; /* Vertically align the logo and heading */
+    margin-bottom: 20px; /* Add spacing below the header */
+}
+
+.profile-header img.profile-logo {
+    width: 50px; /* Adjust the size of the logo */
+    height: 50px; /* Ensure the logo is square */
+    margin-right: 15px; /* Add spacing between the logo and heading */
+    border-radius: 50%; /* Make the logo circular */
+    object-fit: cover; /* Ensure the logo fits well within its dimensions */
+}
+
+.profile-header h2 {
+    margin: 0; /* Remove default margin for better alignment */
+    font-size: 24px; /* Adjust font size for the heading */
+    color: #333; /* Set heading color */
+}
+
+/* Make the container wider */
+.container {
+    margin-top: 60px;
+    padding: 20px;
+    max-width: 1000px; /* Increased max width */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Make the input elements wider */
+.input-group input,
+.input-group textarea {
+    width: 100%; /* Full width of the container */
+    max-width: 100%; /* Ensure they take up the full width available */
+    padding: 10px; /* Increased padding for better spacing */
+}
+
+/* Adjust button width to match form elements */
+button#save-button {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+}
+
+/* Profile Form Styling */
+#farm-form {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+
+fieldset {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+legend {
+    font-size: 20px;
+    font-weight: bold;
+    color: #888;
+}
+
+
+textarea, input[type="text"], input[type="email"], input[type="tel"] {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+
+button#save-button:hover {
+    background-color: #45a049;
+}
+
+/* Profile Header Styling */
+.profile-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.profile-logo {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 20px;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    #farm-form {
+        width: 100%;
+        padding: 10px;
+    }
+
+    button#save-button {
+        width: 100%;
+    }
+
+    nav ul {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    nav ul li {
+        margin-bottom: 10px;
+    }
+}
+
+/* Align the h2 in the profile header with the form */
+.profile-header h2 {
+    color: #333;
+    text-align: left; /* Align the heading text to the left */
+    margin-bottom: 20px; /* Space below the heading */
+    max-width: 600px; /* Matches the form width */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+/* Overview Section */
+#overview-container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.overview-summary h2 {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+/* Chart Styling */
+canvas {
+    max-width: 100%;
+    margin-top: 20px;
 }
