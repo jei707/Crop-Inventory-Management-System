@@ -5,70 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crop Inventory System</title>
     <link rel="stylesheet" href="../static/style.css">
-    <style>
-        /* Styling for the label and input group */
-        .input-group {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-    
-        .input-group label {
-            width: 150px; /* Adjust width for proper label placement */
-            font-weight: bold;
-            margin-right: 10px;
-        }
-    
-        .input-group input,
-        .input-group textarea {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-    
-        .input-group textarea {
-            resize: vertical;
-        }
-    
-        /* Make fields appear as editable sections */
-        .editable {
-            display: block;
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-    
-        /* Add white background to containers (fieldset, container, etc.) */
-        .container,
-        fieldset {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px; /* Add some space between the containers */
-        }
-    
-        fieldset legend {
-            font-weight: bold;
-            padding: 0 10px;
-        }
-    
-        /* Style the Save button */
-        #save-button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-    
-        #save-button:hover {
-            background-color: #45a049;
-        }
-    </style>
 </head>
 <body>
 
@@ -95,12 +31,10 @@
     
     <div class="main-nav">
         <ul>
-            <ul>
-                <li><a href="/home">Home</a></li>
-                <li><a href="/loginsuccessful">Crop Inventory</a></li>
-                <li><a href="/harvest_management">Harvest Management</a></li>
-                <li><a href="/contact">Contact Us</a></li>
-            </ul>
+            <li><a href="/home">Home</a></li>
+            <li><a href="/loginsuccessful">Crop Inventory</a></li>
+            <li><a href="/harvest_management">Harvest Management</a></li>
+            <li><a href="/contact">Contact Us</a></li>
         </ul>
     </div>
 
@@ -243,6 +177,69 @@
         // Load profile data on page load
         window.onload = loadProfileData;
     </script>
-
+    <style>
+        /* Styling for the label and input group */
+        .input-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+    
+        .input-group label {
+            width: 150px; /* Adjust width for proper label placement */
+            font-weight: bold;
+            margin-right: 10px;
+        }
+    
+        .input-group input,
+        .input-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    
+        .input-group textarea {
+            resize: vertical;
+        }
+    
+        /* Make fields appear as editable sections */
+        .editable {
+            display: block;
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    
+        /* Add white background to containers (fieldset, container, etc.) */
+        .container,
+        fieldset {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px; /* Add some space between the containers */
+        }
+    
+        fieldset legend {
+            font-weight: bold;
+            padding: 0 10px;
+        }
+    
+        /* Style the Save button */
+        #save-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    
+        #save-button:hover {
+            background-color: #45a049;
+        }
+    </style>
 </body>
 </html>
