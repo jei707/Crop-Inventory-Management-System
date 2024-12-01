@@ -57,6 +57,18 @@ def generate_item_code():
     crop_count = Crop.query.count()
     return str(crop_count + 1).zfill(5)  # Ensure it's a 5-digit number (e.g., 00001, 00002)
 
+algorithm = "Pigeonhole Sort"
+
+# Route to return the algorithm as a plain text response
+@app.route('/algorithm')
+def get_algorithm():
+    return algorithm  # You can return the algorithm directly as a string
+
+# Route to return the algorithm as a JSON response (optional, in case you need it)
+@app.route('/api/algorithm')
+def get_algorithm_json():
+    return jsonify({'algorithm': algorithm})
+
 # Routes
 @app.route('/delete_all_crops', methods=['DELETE'])
 def delete_all_crops():
