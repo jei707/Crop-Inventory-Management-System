@@ -97,15 +97,11 @@
                         <option value="quantity">Quantity</option>
                     </select>
                 
-                    <select id="sortOrder" onchange="sortCrops()">
-                        <option value="" disabled selected>Sort Order</option>
-                        <option value="ascending">Ascending</option>
-                        <option value="descending">Descending</option>
-                    </select>
+                    
                 
                     <select id="cropLimit" onchange="sortCrops()">
                         <option value="" disabled selected>Number of Crops to Sort</option>
-                        <option value="2500">1000</option>
+                        <option value="1000">1000</option>
                         <option value="5000">5000</option>
                         <option value="10000">10000</option>
                     </select>
@@ -313,7 +309,6 @@
         // Sort crops
         function sortCrops() {
             const sortBy = document.getElementById('sortBy').value;
-            const sortOrder = document.getElementById('sortOrder').value;
             const cropLimit = document.getElementById("cropLimit").value;
 
             // Send request to the server to sort crops
@@ -322,7 +317,7 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ sortBy, sortOrder, limit: parseInt(cropLimit) })
+                body: JSON.stringify({ sortBy, limit: parseInt(cropLimit) })
             })
             .then((response) => response.json())
             .then((data) => {
