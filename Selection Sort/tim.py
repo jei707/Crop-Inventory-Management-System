@@ -16,6 +16,8 @@ import psutil
 from time import time_ns  # Use time_ns for nanosecond precision
 
 
+
+
 # Flask application setup
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///crops.db'  # SQLite database
@@ -56,6 +58,18 @@ with app.app_context():
 def generate_item_code():
     crop_count = Crop.query.count()
     return str(crop_count + 1).zfill(5)  # Ensure it's a 5-digit number (e.g., 00001, 00002)
+
+algorithm = "Tim Sort"
+
+# Route to return the algorithm as a plain text response
+@app.route('/algorithm')
+def get_algorithm():
+    return algorithm  # You can return the algorithm directly as a string
+
+# Route to return the algorithm as a JSON response (optional, in case you need it)
+@app.route('/api/algorithm')
+def get_algorithm_json():
+    return jsonify({'algorithm': algorithm})
 
 # Routes
 @app.route('/delete_all_crops', methods=['DELETE'])
@@ -183,26 +197,24 @@ def update_crop():
         return jsonify({"success": True}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+    
+
 
 @app.route('/sort_crops', methods=['POST'])
 def sort_crops():
     try:
         # Parse request data
-        sort_by = request.json.get('sortBy', 'local_name')  # Default to 'local_name' if not provided
-        sort_order = request.json.get('sortOrder', 'ascending')  # Default to 'ascending' if not provided
+        sort_criteria = request.json.get('sortBy', [{'field': 'local_name', 'order': 'ascending'}])  # Default to sorting by 'local_name' ascending
         limit = request.json.get('limit', 10000)  # Default to 10000 if no limit is provided
-        is_descending = sort_order == 'descending'
-
+        
         # Fetch crops from the database with the specified limit
         crops_query = Crop.query.limit(limit).all()
 
         # Perform sorting with time and space measurement
-        sorted_result, metrics = tim_sort_with_metrics(crops_query, sort_by, is_descending=is_descending)
-
-
+        sorted_result, metrics = tim_sort_with_metrics(crops_query, sort_criteria)
 
         # Log metrics to the server console for debugging
-        print(f"Sorting by: {sort_by}, Order: {sort_order}, Limit: {limit}")
+        print(f"Sorting criteria: {sort_criteria}, Limit: {limit}")
         print(f"Metrics: Execution Time = {metrics['executionTime']} nanoseconds, "
               f"Start Memory = {metrics['startMemory']} MB, "
               f"End Memory = {metrics['endMemory']} MB, "
@@ -220,6 +232,7 @@ def sort_crops():
         # Handle and log errors
         print(f"Error during sorting: {e}")
         return jsonify({"error": str(e)}), 500
+
 
 
 
@@ -260,8 +273,8 @@ def merge(arr, left, mid, right, key, is_descending=False):
         j += 1
         k += 1
 
-# Tim Sort algorithm
-def tim_sort_with_metrics(query_result, key, is_descending=False, min_run=32):
+# Tim Sort algorithm with multiple sorting criteria
+def tim_sort_with_metrics(query_result, sort_criteria, min_run=32):
     arr = [crop.to_dict() for crop in query_result]  # Convert crops to dictionaries
     n = len(arr)
 
@@ -279,7 +292,7 @@ def tim_sort_with_metrics(query_result, key, is_descending=False, min_run=32):
     # Perform insertion sort on subarrays
     for start in range(0, n, min_run):
         end = min(start + min_run - 1, n - 1)
-        insertion_sort(arr, start, end, key, is_descending)
+        insertion_sort(arr, start, end, sort_criteria, is_descending=False)
 
     # Merge the sorted subarrays
     size = min_run
@@ -288,7 +301,7 @@ def tim_sort_with_metrics(query_result, key, is_descending=False, min_run=32):
             mid = min(n - 1, start + size - 1)
             end = min((start + 2 * size - 1), (n - 1))
             if mid < end:
-                merge(arr, start, mid, end, key, is_descending)
+                merge(arr, start, mid, end, sort_criteria, is_descending=False)
         size *= 2
 
     # Measure execution time and memory usage at the end
@@ -306,7 +319,22 @@ def tim_sort_with_metrics(query_result, key, is_descending=False, min_run=32):
     }
 
     # Return sorted array and metrics
-    return arr if not is_descending else arr[::-1], metrics
+    return arr, metrics
+
+
+
+def compare(a, b, sort_criteria, is_descending):
+    for criterion in sort_criteria:
+        field = criterion['field']
+        order = criterion['order']
+        ascending = order == 'ascending'
+        
+        if a[field] != b[field]:
+            if is_descending:
+                return a[field] > b[field] if not ascending else a[field] < b[field]
+            else:
+                return a[field] < b[field] if not ascending else a[field] > b[field]
+    return False
 
 @app.route('/')
 def index():
