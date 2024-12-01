@@ -1,408 +1,450 @@
-import os
-from flask import Flask, render_template, request, jsonify
-from datetime import datetime
-from flask_cors import CORS
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import func
-import matplotlib.pyplot as plt
-import io
-import base64
-from faker import Faker
-from faker_food import FoodProvider
-import time
-import tracemalloc
-from datetime import datetime
-import psutil
-from time import time_ns  # Use time_ns for nanosecond precision
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Inventory System</title>
+    <link rel="icon" href="../static/cropwise_logo.png" type="image/x-icon">
+    <link rel="icon" href="../static/cropwise_logo.png" sizes="32x32">
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
 
+    <nav>
+        <div class="logo-container">
+            <img src="../static/cropwise_logo.png" alt="Logo" class="logo">
+            <h1>CropWise</h1>
+        </div>
+        <ul>
+            <li class="account-dropdown">
+                <a href="#account">My Account | admin</a>
+                <div class="dropdown-content">
+                    <a href="/profile">
+                      <img src="../static/profile.png" alt="Profile Icon" class="dropdown-icon"> Profile
+                    </a>
 
+                    <a href="/">
+                      <img src="../static/logout.png" alt="Profile Icon" class="dropdown-icon">
+                      Logout</a>
+                </div>
+            </li>
+        </ul>
+    </nav>
+    
+    <div class="main-nav">
+        <ul>
+            <li><a href="/home">Home</a></li>
+            <li><a href="/crop-inventory">Crop Inventory</a></li>
+            <li><a href="/harvest_management">Harvest Management</a></li>
+            <li><a href="/contact">Contact Us</a></li>
+        </ul>
+    </div>
 
+    <div class="container">
+        <button id="toggle-add-crop-form">+ New Crop</button>
+        <button id="delete-all-button" onclick="deleteAllCrops()">Delete All Crops</button>
 
-# Flask application setup
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///crops.db'  # SQLite database
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
-CORS(app)  # Enable CORS
-fake = Faker()
-fake.add_provider(FoodProvider)
+        <form id="add-crop-form" style="display:none;">
+            <h2 id="form-title">Add Crop</h2>
+            <input type="text" id="localName" placeholder="Local Name" required>
+            <select id="category" required>
+                <option value="" disabled selected>Select Category</option>
+                <option value="Vegetables">Vegetables</option>
+                <option value="Fruits">Fruits</option>
+                <option value="Fibre Crop">Fibre Crop</option>
+                <option value="Nut">Nut</option>
+                <option value="Root and Tuber">Root and Tuber</option>
+                <option value="Grain">Grain</option>
+                <option value="Tobacco">Tobacco</option>
+                <option value="Pulse">Pulse</option>
+                <option value="Oil Crop">Oil Crop</option>
+            </select>
+            <select id="seasonality" required>
+                <option value="" disabled selected>Select Seasonality</option>
+                <option value="Wet">Wet</option>
+                <option value="Dry">Dry</option>
+                <option value="Wet and Dry">Wet and Dry</option>
+            </select>
+            <select id="flagDescription" required>
+                <option value="" disabled selected>Select Flag Description</option>
+                <option value="Organic">Organic</option>
+                <option value="Non-GMO">Non-GMO</option>
+                <option value="Hybrid">Hybrid</option>
+                <option value="Heirloom">Heirloom</option>
+            </select>
+            <input type="date" id="harvestDate" required>
+            <input type="number" id="quantity" placeholder="Quantity" required>
+            <button type="button" id="add-crop-button" onclick="addCrop()">Add Crop</button>
+            <button type="button" id="update-crop-button" onclick="updateCrop()" style="display:none;">Update Crop</button>
+        </form>
 
-# Crop model
-class Crop(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    local_name = db.Column(db.String(100), nullable=False)
-    category = db.Column(db.String(50), nullable=False)
-    seasonality = db.Column(db.String(50), nullable=False)
-    flag_description = db.Column(db.String(50), nullable=False)
-    harvest_date = db.Column(db.Date, nullable=False)
-    quantity = db.Column(db.Integer, nullable=False)
-    item_code = db.Column(db.String(10), nullable=False, unique=True)
+        <div class="search-bar">
+            <input type="text" id="search-input" placeholder="Search for crops..." onkeyup="search()">
+        </div>
 
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "localName": self.local_name,
-            "category": self.category,
-            "seasonality": self.seasonality,
-            "flagDescription": self.flag_description,
-            "harvestDate": self.harvest_date.strftime('%Y-%m-%d'),
-            "quantity": self.quantity,
-            "itemCode": self.item_code
+        <div id="crop-list-container">
+            <div id="crop-table">
+                <h2>Crop List</h2>
+                <div id="sort-options" class="sort-by-dropdown">
+                    <select id="sortBy" onchange="sortCrops()">
+                        <option value="" disabled selected>Sort By</option>
+                        <option value="itemCode">Item Code</option>
+                        <option value="localName">Local Name</option>
+                        <option value="category">Category</option>
+                        <option value="seasonality">Seasonality</option>
+                        <option value="flagDescription">Flag Description</option>
+                        <option value="harvestDate">Harvest Date</option>
+                        <option value="quantity">Quantity</option>
+                    </select>
+                
+                    
+                
+                    <select id="cropLimit" onchange="sortCrops()">
+                        <option value="" disabled selected>Number of Crops to Sort</option>
+                        <option value="1000">1000</option>
+                        <option value="5000">5000</option>
+                        <option value="10000">10000</option>
+                    </select>
+                
+                    <button id="toggle-metrics">Show Complexity Metrics</button>
+                </div>
+            
+                <div id="complexity-metrics-modal" class="modal">
+                    <div class="modal-content">
+                        <button id="close-metrics-modal" class="close-button">&times;</button>
+                        <h3>Complexity Measurements</h3>
+                        <p><strong>Sorting Algorithm:</strong> <span id="algorithmDisplay">N/A</span></p>
+                        <p><strong>Execution Time:</strong> <span id="execution-time">N/A</span></p>
+                        <p><strong>Memory Usage:</strong> <span id="memory-used"> N/A </span></p>
+                        <p><strong>Start Memory:</strong> <span id="start-memory">N/A</span></p>
+                        <p><strong>End Memory:</strong> <span id="end-memory">N/A</span></p>
+                    </div>
+                </div>
+            
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item Code</th>
+                            <th>Local Name</th>
+                            <th>Category</th>
+                            <th>Seasonality</th>
+                            <th>Flag Description</th>
+                            <th>Harvest Date</th>
+                            <th>Quantity(kg)</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="crop-list">
+                        <!-- Crop entries will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+    <script>
+        let crops = [];  // Keep track of crops data locally
+        let editIndex = null;
+
+        function fetchAlgorithm() {
+            fetch('/algorithm')  // You can also use '/api/algorithm' if using JSON
+                .then(response => response.text())  // Parse the response as text
+                .then(data => {
+                    document.getElementById('algorithmDisplay').innerText = data;
+                })
+                .catch(error => {
+                    console.error('Error fetching algorithm:', error);
+                });
+        }
+        window.onload = fetchAlgorithm;
+
+        // Fetch and display crops when page loads or after adding a crop
+        function fetchAndDisplayCrops() {
+            fetch('/get_crops')
+                .then(response => response.json())
+                .then(data => {
+                    crops = data;  // Update the crops array with the new data
+                    displayCrops(crops);  // Display the crops in the table
+                })
+                .catch(error => console.error('Error fetching crops:', error));
         }
 
-# Initialize the database
-with app.app_context():
-    db.create_all()
+        // Add crop (this will now create a new crop)
+        function addCrop() {
+            const localName = document.getElementById('localName').value;
+            const category = document.getElementById('category').value;
+            const seasonality = document.getElementById('seasonality').value;
+            const flagDescription = document.getElementById('flagDescription').value;
+            const harvestDate = document.getElementById('harvestDate').value;
+            const quantity = document.getElementById('quantity').value;
 
-# Function to generate a unique item code
-def generate_item_code():
-    crop_count = Crop.query.count()
-    return str(crop_count + 1).zfill(5)  # Ensure it's a 5-digit number (e.g., 00001, 00002)
+            const crop = {
+                localName,
+                category,
+                seasonality,
+                flagDescription,
+                harvestDate,
+                quantity
+            };
 
-algorithm = "Tim Sort"
-
-# Route to return the algorithm as a plain text response
-@app.route('/algorithm')
-def get_algorithm():
-    return algorithm  # You can return the algorithm directly as a string
-
-# Route to return the algorithm as a JSON response (optional, in case you need it)
-@app.route('/api/algorithm')
-def get_algorithm_json():
-    return jsonify({'algorithm': algorithm})
-
-# Routes
-@app.route('/delete_all_crops', methods=['DELETE'])
-def delete_all_crops():
-    try:
-        # Delete all crop records from the database
-        Crop.query.delete()
-        db.session.commit()
-        return jsonify({'success': True, 'message': 'All crops have been deleted.'}), 200
-    except Exception as e:
-        # Handle and log any exceptions
-        return jsonify({'success': False, 'error': str(e)}), 500
-    
-@app.route('/get_crops', methods=['GET'])
-def get_crops():
-    crops = Crop.query.all()
-    return jsonify([crop.to_dict() for crop in crops])
-
-@app.route('/add_crop', methods=['POST'])
-def add_crop():
-    try:
-        crop_data = request.json
-        # Check if it's an update or new crop
-        if 'id' in crop_data:  # Update existing crop
-            crop = Crop.query.get(crop_data['id'])
-            if not crop:
-                return jsonify({"error": "Crop not found"}), 404
-        else:  # Adding new crop
-            crop = Crop(
-                local_name=crop_data['localName'],
-                category=crop_data['category'],
-                seasonality=crop_data['seasonality'],
-                flag_description=crop_data['flagDescription'],
-                harvest_date=datetime.strptime(crop_data['harvestDate'], "%Y-%m-%d"),
-                quantity=crop_data['quantity'],
-                item_code=generate_item_code()  # Generate unique item code for new crop
-            )
-            db.session.add(crop)
-
-        # Update the crop data (either new or edited)
-        crop.local_name = crop_data['localName']
-        crop.category = crop_data['category']
-        crop.seasonality = crop_data['seasonality']
-        crop.flag_description = crop_data['flagDescription']
-        crop.harvest_date = datetime.strptime(crop_data['harvestDate'], "%Y-%m-%d")
-        crop.quantity = crop_data['quantity']
-
-        db.session.commit()
-
-        return jsonify({"success": True, "itemCode": crop.item_code}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
-    #Function to seed the database with random crops
-def seed_database():
-    if not Crop.query.first():  # Only seed if the database is empty
-        
-        for _ in range(10000):
-            crop = Crop(
-                local_name=fake.random_element(elements=[
-                        "Tomato", "Potato", "Rice", "Wheat", "Carrot", "Spinach", "Lettuce", "Onion", "Garlic", 
-                        "Corn", "Cucumber", "Cabbage", "Peas", "Soybean", "Oats", "Barley", "Millet", "Tobacco", 
-                        "Coffee", "Cocoa", "Cotton", "Banana", "Apple", "Mango", "Papaya", "Guava", "Pineapple", 
-                        "Sugarcane", "Tea", "Chili", "Bell Pepper", "Broccoli", "Cauliflower", "Zucchini", 
-                        "Pumpkin", "Sweet Potato", "Mustard", "Sunflower", "Groundnut (Peanut)", "Lentils", 
-                        "Chickpeas", "Beans", "Sesame", "Quinoa", "Sorghum", "Durum Wheat", "Flaxseed", "Coconut", 
-                        "Almond", "Cashew", "Pomegranate", "Strawberry", "Raspberry", "Blueberry", "Blackberry", 
-                        "Avocado", "Pear", "Orange", "Lemon", "Lime", "Grapefruit", "Durian", "Lychee", "Date", 
-                        "Fig", "Apricot", "Cherry", "Plum", "Peach", "Nectarine", "Kale", "Turnip", "Radish", 
-                        "Beetroot", "Artichoke", "Asparagus", "Okra", "Eggplant", "Cilantro", "Parsley", "Thyme", 
-                        "Basil", "Rosemary", "Mint", "Taro", "Yam", "Cranberry", "Gooseberry", "Starfruit", 
-                        "Jackfruit", "Watermelon", "Honeydew", "Cantaloupe", "Persimmon", "Dragon Fruit", 
-                        "Kiwifruit", "Passion Fruit", "Sugar Beet", "Horseradish", "Leek", "Scallion", "Arugula", 
-                        "Fennel", "Dill", "Chive", "Endive"
-                ]),
-                category=fake.random_element(elements=[
-                    "Vegetables", "Fruits", "Fibre Crop", "Nut", 
-                    "Root and Tuber", "Grain", "Tobacco", "Pulse", "Oil Crop"
-                ]),
-                seasonality=fake.random_element(elements=["Wet", "Dry", "Wet and Dry"]),
-                flag_description=fake.random_element(elements=["Organic", "Non-GMO", "Hybrid", "Heirloom"]),
-                harvest_date=fake.date_between(start_date='-1y', end_date='today'),
-                quantity=fake.random_int(min=10, max=500),
-                item_code=generate_item_code()  # Generate the item code
-            )
-            db.session.add(crop)
-        
-        db.session.commit()
-        print("Database seeded with 10000 entries.")
-
-@app.before_request
-def populate_database():
-    seed_database()
-
-
-@app.route('/delete_crop/<item_code>', methods=['DELETE'])
-def delete_crop(item_code):
-    try:
-        # Fetch crop using itemCode
-        crop = Crop.query.filter_by(item_code=item_code).first()
-        if crop:
-            db.session.delete(crop)
-            db.session.commit()
-            return jsonify({"success": True, "message": "Crop deleted successfully"}), 200
-        else:
-            return jsonify({"error": "Crop not found"}), 404
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/update_crop', methods=['PUT'])
-def update_crop():
-    try:
-        crop_data = request.json
-        crop = Crop.query.get(crop_data['id'])
-        if not crop:
-            return jsonify({"error": "Crop not found"}), 404
-        
-        crop.local_name = crop_data['localName']
-        crop.category = crop_data['category']
-        crop.seasonality = crop_data['seasonality']
-        crop.flag_description = crop_data['flagDescription']
-        crop.harvest_date = datetime.strptime(crop_data['harvestDate'], "%Y-%m-%d")
-        crop.quantity = crop_data['quantity']
-        
-        db.session.commit()
-        return jsonify({"success": True}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
-    
-
-
-@app.route('/sort_crops', methods=['POST'])
-def sort_crops():
-    try:
-        # Parse request data
-        sort_criteria = request.json.get('sortBy', [{'field': 'local_name', 'order': 'ascending'}])  # Default to sorting by 'local_name' ascending
-        limit = request.json.get('limit', 10000)  # Default to 10000 if no limit is provided
-        
-        # Fetch crops from the database with the specified limit
-        crops_query = Crop.query.limit(limit).all()
-
-        # Perform sorting with time and space measurement
-        sorted_result, metrics = tim_sort_with_metrics(crops_query, sort_criteria)
-
-        # Log metrics to the server console for debugging
-        print(f"Sorting criteria: {sort_criteria}, Limit: {limit}")
-        print(f"Metrics: Execution Time = {metrics['executionTime']} nanoseconds, "
-              f"Start Memory = {metrics['startMemory']} MB, "
-              f"End Memory = {metrics['endMemory']} MB, "
-              f"Memory Used = {metrics['memoryUsed']} MB")
-
-        # Format the response
-        response = {
-            "sortedCrops": sorted_result,
-            "metrics": metrics,
+            fetch('/add_crop', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(crop)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    fetchAndDisplayCrops();  // Refresh the crop list after adding
+                    document.getElementById('add-crop-form').reset();
+                    document.getElementById('add-crop-form').style.display = 'none';
+                } else {
+                    alert('Failed to add crop.');
+                }
+            })
+            .catch(error => {
+                console.error('Error adding crop:', error);
+                alert('Error adding crop.');
+            });
         }
 
-        return jsonify(response), 200
-
-    except Exception as e:
-        # Handle and log errors
-        print(f"Error during sorting: {e}")
-        return jsonify({"error": str(e)}), 500
-
-
-
-
-# Helper function for insertion sort used in Tim Sort
-def insertion_sort(arr, left, right, key, is_descending=False):
-    for i in range(left + 1, right + 1):
-        temp = arr[i]
-        j = i - 1
-        while j >= left and ((temp[key] < arr[j][key]) if not is_descending else (temp[key] > arr[j][key])):
-            arr[j + 1] = arr[j]
-            j -= 1
-        arr[j + 1] = temp
-
-# Merge function to merge two sorted subarrays
-def merge(arr, left, mid, right, key, is_descending=False):
-    len1, len2 = mid - left + 1, right - mid
-    left_arr = arr[left:mid + 1]
-    right_arr = arr[mid + 1:right + 1]
-    
-    i = j = 0
-    k = left
-    while i < len1 and j < len2:
-        if (left_arr[i][key] < right_arr[j][key]) if not is_descending else (left_arr[i][key] > right_arr[j][key]):
-            arr[k] = left_arr[i]
-            i += 1
-        else:
-            arr[k] = right_arr[j]
-            j += 1
-        k += 1
-    
-    while i < len1:
-        arr[k] = left_arr[i]
-        i += 1
-        k += 1
-    
-    while j < len2:
-        arr[k] = right_arr[j]
-        j += 1
-        k += 1
-
-# Tim Sort algorithm with multiple sorting criteria
-def tim_sort_with_metrics(query_result, sort_criteria, min_run=32):
-    arr = [crop.to_dict() for crop in query_result]  # Convert crops to dictionaries
-    n = len(arr)
-
-    # Measure execution time in nanoseconds using time_ns
-    start_time_ns = time.time_ns()
-
-    # Get memory usage at the start
-    process = psutil.Process(os.getpid())
-    start_memory = process.memory_info().rss / 2**20  # Memory in MiB
-
-    # Function to get current memory usage during the process
-    def get_current_memory_usage():
-        return process.memory_info().rss / 2**20  # Current memory in MiB
-
-    # Perform insertion sort on subarrays
-    for start in range(0, n, min_run):
-        end = min(start + min_run - 1, n - 1)
-        insertion_sort(arr, start, end, sort_criteria, is_descending=False)
-
-    # Merge the sorted subarrays
-    size = min_run
-    while size < n:
-        for start in range(0, n, 2 * size):
-            mid = min(n - 1, start + size - 1)
-            end = min((start + 2 * size - 1), (n - 1))
-            if mid < end:
-                merge(arr, start, mid, end, sort_criteria, is_descending=False)
-        size *= 2
-
-    # Measure execution time and memory usage at the end
-    end_time_ns = time.time_ns()
-    execution_time_ns = end_time_ns - start_time_ns  # Execution time in nanoseconds
-
-    end_memory = process.memory_info().rss / 2**20  # Memory in MiB
-
-    # Prepare metrics
-    metrics = {
-        "executionTime": execution_time_ns,  # Execution time in nanoseconds
-        "startMemory": round(start_memory, 2),
-        "endMemory": round(end_memory, 2),
-        "memoryUsed": round(end_memory - start_memory, 2)
-    }
-
-    # Return sorted array and metrics
-    return arr, metrics
-
-
-
-def compare(a, b, sort_criteria, is_descending):
-    for criterion in sort_criteria:
-        field = criterion['field']
-        order = criterion['order']
-        ascending = order == 'ascending'
-        
-        if a[field] != b[field]:
-            if is_descending:
-                return a[field] > b[field] if not ascending else a[field] < b[field]
-            else:
-                return a[field] < b[field] if not ascending else a[field] > b[field]
-    return False
-
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-@app.route('/home')
-def home():
-    return render_template('home.html')
-
-@app.route('/loggedout')
-def loggedout():
-    return render_template('loggedout.html')
-
-@app.route('/login')
-def login():
-    return render_template('login.html')
-
-@app.route('/crop-inventory')
-def loginsuccessful():
-    return render_template('loginsuccessful.html')
-
-@app.route('/contact')
-def contact():
-    return render_template('contact.html')
-
-@app.route('/profile')
-def profile():
-    return render_template('profile.html')
-
-@app.route('/harvest_management')
-def pharvest_management():
-    return render_template('harvest_management.html')
-
-@app.route('/overview', methods=['GET'])
-def overview():
-    try:
-        # Get total number of crops
-        total_crops = Crop.query.count()
-
-        # Get total quantity of all crops
-        total_quantity = db.session.query(func.sum(Crop.quantity)).scalar() or 0
-
-        # Get harvest timelines (group by harvest month)
-        harvest_timeline = db.session.query(
-            func.strftime('%Y-%m', Crop.harvest_date),
-            func.count(Crop.id),
-            func.sum(Crop.quantity)
-        ).group_by(func.strftime('%Y-%m', Crop.harvest_date)).all()
-
-        # Process data for display
-        harvest_data = [
-            {
-                "month": datetime.strptime(month, '%Y-%m').strftime('%B %Y'),
-                "crop_count": crop_count,
-                "total_quantity": total_quantity
+                // Delete all crops function
+                function deleteAllCrops() {
+            // Confirm action with the user
+            if (!confirm("Are you sure you want to delete all crops? This action cannot be undone.")) {
+                return;
             }
-            for month, crop_count, total_quantity in harvest_timeline
-        ]
 
-        # Return a JSON response with the overview data
-        return jsonify({
-            "totalCrops": total_crops,
-            "totalQuantity": total_quantity,
-            "harvestTimeline": harvest_data
-        }), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-    
-if __name__ == '__main__':
-    app.run(debug=True)
-    
+            // Send a DELETE request to the backend
+            fetch('/delete_all_crops', {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    crops = []; // Clear the local crops array
+                    displayCrops(crops); // Refresh the display
+                    alert('All crops have been deleted successfully.');
+                } else {
+                    alert('Failed to delete all crops.');
+                }
+            })
+            .catch(error => console.error('Error deleting all crops:', error));
+        }
+
+
+        // Update existing crop
+        function updateCrop() {
+            const localName = document.getElementById('localName').value;
+            const category = document.getElementById('category').value;
+            const seasonality = document.getElementById('seasonality').value;
+            const flagDescription = document.getElementById('flagDescription').value;
+            const harvestDate = document.getElementById('harvestDate').value;
+            const quantity = document.getElementById('quantity').value;
+
+            const crop = {
+                id: crops[editIndex].id,  // Include the crop ID for updating
+                localName,
+                category,
+                seasonality,
+                flagDescription,
+                harvestDate,
+                quantity
+            };
+
+            fetch('/update_crop', {
+                method: 'PUT', // Use PUT method
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(crop)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    fetchAndDisplayCrops();  // Refresh the crop list after updating
+                    document.getElementById('add-crop-form').reset();  // Clear the form
+                    document.getElementById('add-crop-form').style.display = 'none';  // Hide the form
+                    document.getElementById('add-crop-button').style.display = 'block';  // Show Add Crop button
+                    document.getElementById('update-crop-button').style.display = 'none';  // Hide Update button
+                } else {
+                    alert('Failed to update crop.');
+                }
+            })
+            .catch(error => console.error('Error updating crop:', error));
+        }
+
+        // Edit crop function (sets the form for editing)
+        function editCrop(index) {
+            const crop = crops[index];
+            document.getElementById('localName').value = crop.localName;
+            document.getElementById('category').value = crop.category;
+            document.getElementById('seasonality').value = crop.seasonality;
+            document.getElementById('flagDescription').value = crop.flagDescription;
+            document.getElementById('harvestDate').value = crop.harvestDate;
+            document.getElementById('quantity').value = crop.quantity;
+
+            editIndex = index;  // Set the index of the crop being edited
+            document.getElementById('add-crop-button').style.display = 'none';
+            document.getElementById('update-crop-button').style.display = 'block';
+            document.getElementById('add-crop-form').style.display = 'block';
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const toggleMetricsButton = document.getElementById("toggle-metrics");
+            const metricsModal = document.getElementById("complexity-metrics-modal");
+            const closeButton = document.getElementById("close-metrics-modal");
+
+            // Toggle modal visibility
+            toggleMetricsButton.addEventListener("click", function () {
+                const isHidden = metricsModal.style.display === "none" || metricsModal.style.display === "";
+                metricsModal.style.display = isHidden ? "block" : "none";
+                toggleMetricsButton.innerText = isHidden ? "Hide Complexity Metrics" : "Show Complexity Metrics";
+            });
+
+            // Close modal when clicking the close button
+            closeButton.addEventListener("click", function () {
+                metricsModal.style.display = "none";
+                toggleMetricsButton.innerText = "Show Complexity Metrics";
+            });
+
+            // Close modal when clicking outside the modal content
+            window.addEventListener("click", function (event) {
+                if (event.target === metricsModal) {
+                    metricsModal.style.display = "none";
+                    toggleMetricsButton.innerText = "Show Complexity Metrics";
+                }
+            });
+        });
+
+                
+        // Sort crops
+        function sortCrops() {
+            const sortBy = document.getElementById('sortBy').value;
+            const cropLimit = document.getElementById("cropLimit").value;
+
+            // Send request to the server to sort crops
+            fetch('/sort_crops', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ sortBy, limit: parseInt(cropLimit) })
+            })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.sortedCrops) {
+                    crops = data.sortedCrops; // Update the local crops array with the sorted crops
+                    displayCrops(crops); // Re-display crops in the sorted order
+                    updateComplexityMetrics(data.metrics); // Call the function to display metrics
+                } else {
+                    console.error("Error fetching sorted crops:", data.error);
+                }
+            })
+            .catch((error) => console.error("Error sorting crops:", error));
+        }
+
+        // Display crops in the table
+        function displayCrops(crops) {
+            const cropList = document.getElementById("crop-list");
+            cropList.innerHTML = ""; // Clear existing list
+
+            crops.forEach((crop, index) => {
+                const cropRow = document.createElement("tr");
+                cropRow.innerHTML = `
+                    <td>${crop.itemCode}</td>
+                    <td>${crop.localName}</td>
+                    <td>${crop.category}</td>
+                    <td>${crop.seasonality}</td>
+                    <td>${crop.flagDescription}</td>
+                    <td>${crop.harvestDate}</td>
+                    <td>${crop.quantity}</td>
+                    <td>
+                        <button onclick="editCrop(${index})">Edit</button>
+                        <button onclick="deleteCrop(${index})">Delete</button>
+                    </td>
+                `;
+                cropList.appendChild(cropRow);
+            });
+        }
+
+        // Function to update and display the complexity metrics
+        function updateComplexityMetrics(metrics) {
+
+            
+            // Update execution time element
+            document.getElementById("execution-time").innerText = metrics.executionTime
+                ? metrics.executionTime + " nanoseconds" 
+                : "N/A";
+
+            // Update start memory element
+            document.getElementById("start-memory").innerText = metrics.startMemory
+                ? metrics.startMemory + " MB" 
+                : "N/A";
+
+            // Update end memory element
+            document.getElementById("end-memory").innerText = metrics.endMemory
+                ? metrics.endMemory + " MB" 
+                : "N/A";
+
+            // Update memory used element
+            document.getElementById("memory-used").innerText = metrics.memoryUsed
+                ? metrics.memoryUsed + " MiB" 
+                : "N/A";
+
+            // Optionally, update other metrics if you have them
+            document.getElementById("other-metrics").innerText = metrics.otherMetrics
+                ? metrics.otherMetrics
+                : "N/A";
+        }
+        
+
+
+        // Delete crop function
+        function deleteCrop(index) {
+            const crop = crops[index];
+
+            // Make a DELETE request to the server to delete the crop
+            fetch(`/delete_crop/${crop.itemCode}`, {
+                method: 'DELETE',
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    crops.splice(index, 1);  // Remove from local array
+                    displayCrops(crops);      // Refresh the display
+                } else {
+                    alert('Failed to delete crop.');
+                }
+            })
+            .catch(error => console.error('Error deleting crop:', error));
+        }
+
+        // Search function
+        function search() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const filteredCrops = crops.filter(crop => {
+                return crop.localName.toLowerCase().includes(searchTerm) ||
+                    crop.category.toLowerCase().includes(searchTerm) ||
+                    crop.seasonality.toLowerCase().includes(searchTerm) ||
+                    crop.itemCode.toString().includes(searchTerm) ||
+                    crop.flagDescription.toLowerCase().includes(searchTerm) ||
+                    crop.harvestDate.toLowerCase().includes(searchTerm) ||
+                    crop.quantity.toString().includes(searchTerm);
+            });
+            displayCrops(filteredCrops);
+        }
+
+        // Initialize the page by fetching crops
+        document.addEventListener("DOMContentLoaded", function() {
+            fetchAndDisplayCrops();
+            
+            document.getElementById('toggle-add-crop-form').addEventListener('click', function() {
+                const form = document.getElementById('add-crop-form');
+                form.style.display = form.style.display === 'none' ? 'block' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>
