@@ -1,0 +1,534 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body styling */
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #f4f4f4;
+    line-height: 1.6;
+}
+
+/* Navigation Bar Styling */
+
+nav {
+    background-color: #00ba10; /* Green background for the navigation */
+    color: white;
+    padding: 10px;
+    display: flex; /* Use flexbox to align elements */
+    justify-content: space-between; /* Space out the elements with space between */
+    align-items: center; /* Vertically center the items */
+}
+
+nav .logo-container {
+    display: flex; /* Keep the logo and text together in a row */
+    align-items: center; /* Vertically center them */
+}
+
+nav .logo {
+    max-width: 50px; /* Adjust the logo size */
+    height: auto; /* Maintain aspect ratio */
+}
+
+nav h1 {
+    margin: 0 0 0 10px; /* Remove any default margin and add a little space to the right of the logo */
+    font-size: 24px; /* Adjust font size for the h1 */
+    color: white;
+    text-align: left; /* Left-align the text */
+}
+
+nav ul {
+    display: flex;
+    list-style: none;
+}
+
+nav ul li {
+    margin-left: 20px; /* Adjust spacing between navigation items */
+}
+
+nav ul li a {
+    color: white; /* White text color for the links */
+    text-decoration: none; /* Removes underline from links */
+    padding: 5px 10px; /* Adds some padding around the link text */
+    display: inline-block; /* Ensures the links are clickable around their text */
+}
+
+nav ul li a:hover {
+    background-color: #555; /* Darker background on hover */
+    border-radius: 4px; /* Rounded corners on hover */
+}
+
+/* Styling for the secondary (main-nav) bar */
+.main-nav {
+    margin-top: 0px; /* Adds space below the first navigation bar */
+    background-color: #13a40040; /* Light background for the second navigation */
+    padding: 0px 0; /* Vertical padding for the secondary navigation */
+}
+
+.main-nav ul {
+    list-style: none; /* Removes default bullet points */
+    padding: 0;
+    margin: 0;
+    display: flex; /* Use flexbox for alignment */
+    justify-content: space-evenly; /* Evenly spread out the items */
+    text-align: center; /* Center-align the text */
+}
+
+.main-nav ul li {
+    display: inline-block; /* Keeps items inline */
+    margin-right: 15px; /* Adds space between items */
+}
+
+.main-nav ul li a {
+    color: #0e4700; /* Dark text for the links */
+    text-decoration: none; /* Removes underline */
+    padding: 5px 25px; /* Padding for the links */
+    display: inline-block; /* Ensures full clickable area */
+}
+
+.main-nav ul li a:hover {
+    background-color: #00a53188; /* Darker background on hover */
+    border-radius: 4px; /* Rounded corners on hover */
+}
+
+/* Modal container styling */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Modal content styling */
+.modal-content {
+    position: relative;
+    margin: auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 10px;
+    width: 50%;
+    top: 20%;
+    text-align: center;
+}
+
+/* Close button styling */
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: black;
+    font-weight: bold;
+}
+
+.close-button:hover {
+    color: red;
+}
+
+
+
+/* Container for content */
+.container {
+    margin-top: 60px; /* To avoid content being hidden behind the nav bar */
+    padding: 20px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Search Bar on the Right */
+.search-bar {
+    position: absolute;
+    right: 185px;
+    top: 170px;
+    z-index: 5;  /* Lower z-index to position it behind the dropdown */
+    width: 255px;  /* Set a fixed width for the search bar container */
+}
+
+.search-bar input {
+    width: 100%; /* Ensure the input takes up the full width of the container */
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    box-sizing: border-box; /* Ensure padding and border are included in the width */
+    font-size: 16px; /* Set a fixed font size */
+}
+
+/* Heading styling */
+h1, h2 {
+    color: #333;
+}
+
+/* Button Styling */
+button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+button:focus {
+    outline: none;
+}
+
+/* Form Inputs */
+input[type="text"], input[type="number"], input[type="date"], select {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, select:focus {
+    border-color: #4CAF50;
+    outline: none;
+}
+
+/* Dropdown container styling */
+.account-dropdown {
+    position: relative;
+}
+
+.account-dropdown .dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%; /* Position below the 'My Account' link */
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 15; /* Higher z-index to make sure it's on top of the search bar */
+}
+
+.account-dropdown .dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.account-dropdown .dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+
+/* Show dropdown on hover */
+.account-dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Form Section */
+
+#add-crop-form {
+    width: 100%; /* Set to desired width */
+    margin: 10px; /* Optional: adds space around each form */
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#sort-options {
+    display: flex;
+    align-items: center;
+    gap: 20px; /* Adds space between elements */
+}
+
+/* Styling for the Sort By dropdown */
+.sort-by-dropdown {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin-bottom: 20px; /* Add some space between dropdown and the crop table */
+}
+
+.sort-by-dropdown h4 {
+    margin-right: 10px;
+    font-size: 15px;
+}
+
+.sort-by-dropdown select {
+    padding: 5px;
+    font-size: 14px;
+    width: 200px; /* Make the dropdown wider */
+}
+
+/* Crop Table Styling */
+#crop-table {
+    margin-top: 20px;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 100%; /* Keeps table at 100% width within its container */
+    box-sizing: border-box; /* Ensure padding doesn’t affect width */
+}
+
+/* Crop list section */
+#crop-list-container {
+    max-width: 1200px; /* Limit the width */
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-left: auto;
+    margin-right: auto; /* Center the elements */
+}
+
+#crop-list-container h2 {
+    margin-right: 20px; /* Adds some space between the heading and the dropdown */
+}
+
+/* Crop table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #4CAF50;
+    color: white;
+}
+
+td {
+    background-color: #f9f9f9;
+}
+
+td button {
+    background-color: #808080;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+td button:hover {
+    background-color: #6c6c6c;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    nav ul {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    nav ul li {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+
+    .container {
+        padding: 10px;
+    }
+
+    button {
+        width: 100%;
+    }
+
+    input[type="text"], input[type="number"], input[type="date"], select {
+        width: 100%;
+    }
+
+    table {
+        font-size: 14px;
+    }
+
+    /* Stack Sort dropdown and crop list in mobile view */
+    .sort-by-dropdown {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+/* Profile Header Styling */
+.profile-header {
+    display: flex; /* Align items in a row */
+    align-items: center; /* Vertically align the logo and heading */
+    margin-bottom: 20px; /* Add spacing below the header */
+}
+
+.profile-header img.profile-logo {
+    width: 50px; /* Adjust the size of the logo */
+    height: 50px; /* Ensure the logo is square */
+    margin-right: 15px; /* Add spacing between the logo and heading */
+    border-radius: 50%; /* Make the logo circular */
+    object-fit: cover; /* Ensure the logo fits well within its dimensions */
+}
+
+.profile-header h2 {
+    margin: 0; /* Remove default margin for better alignment */
+    font-size: 24px; /* Adjust font size for the heading */
+    color: #333; /* Set heading color */
+}
+
+
+/* Make the input elements wider */
+.input-group input,
+.input-group textarea {
+    width: 100%; /* Full width of the container */
+    max-width: 100%; /* Ensure they take up the full width available */
+    padding: 10px; /* Increased padding for better spacing */
+}
+
+/* Adjust button width to match form elements */
+button#save-button {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+}
+
+/* Profile Form Styling */
+#farm-form {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+
+fieldset {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+legend {
+    font-size: 20px;
+    font-weight: bold;
+    color: #888;
+}
+
+
+textarea, input[type="text"], input[type="email"], input[type="tel"] {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+
+button#save-button:hover {
+    background-color: #45a049;
+}
+
+/* Profile Header Styling */
+.profile-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.profile-logo {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 20px;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    #farm-form {
+        width: 100%;
+        padding: 10px;
+    }
+
+    button#save-button {
+        width: 100%;
+    }
+
+    nav ul {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    nav ul li {
+        margin-bottom: 10px;
+    }
+}
+
+/* Align the h2 in the profile header with the form */
+.profile-header h2 {
+    color: #333;
+    text-align: left; /* Align the heading text to the left */
+    margin-bottom: 20px; /* Space below the heading */
+    max-width: 600px; /* Matches the form width */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+/* Overview Section */
+#overview-container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.overview-summary h2 {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+/* Chart Styling */
+canvas {
+    max-width: 100%;
+    margin-top: 20px;
+}
+
+/* Add a specific class for the icons in the dropdown */
+.account-dropdown .dropdown-icon {
+    width: 20px; /* Adjust the icon size */
+    height: auto; /* Maintain aspect ratio */
+    margin-right: 10px; /* Space between the icon and the text */
+}
+
+/* Make sure the icon and text are vertically aligned */
+.account-dropdown a {
+    display: flex;
+    align-items: center; /* Vertically align the text with the icon */
+}
+
+/* Dropdown content */
+.account-dropdown .dropdown-content a {
+    display: flex;
+    align-items: center; /* Align icon and text in dropdown items */
+}
+
+.account-dropdown .dropdown-content a:hover {
+    background-color: #f1f1f1; /* Optional: Hover effect for dropdown items */
+}
