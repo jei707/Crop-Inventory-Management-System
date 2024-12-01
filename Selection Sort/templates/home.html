@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Inventory System</title>
+    <link rel="icon" href="../static/cropwise_logo.png" type="image/x-icon">
+    <link rel="stylesheet" href="../static/style.css">
+    <style>
+        /* General body styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+
+        /* Hero section with background image */
+        .hero {
+           
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            text-align: center;
+            padding: 80px 20px;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            color: #004d00;
+            margin-bottom: 20px;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            max-width: 75%;
+            margin: 20px auto;
+            color: #000000;
+        }
+
+        /* Main navigation styling */
+        nav {
+            background-color: #00ba10;
+            color: white;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        nav .logo {
+            max-width: 50px;
+            height: auto;
+        }
+
+        nav h1 {
+            margin-left: 10px;
+            font-size: 24px;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-left: 20px;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            padding: 5px 10px;
+        }
+
+        nav ul li a:hover {
+            background-color: #555;
+            border-radius: 4px;
+        }
+
+        /* Main navigation (secondary) bar */
+        .main-nav {
+            background-color: #13a40040;
+            padding: 0;
+        }
+
+        .main-nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            text-align: left;
+        }
+
+        .main-nav ul li {
+            display: inline-block;
+            margin-right: 15px;
+        }
+
+        .main-nav ul li a {
+            color: #0e4700;
+            padding: 5px 25px;
+        }
+
+        .main-nav ul li a:hover {
+            background-color: #00a53188;
+            border-radius: 4px;
+        }
+
+        /* Card container section */
+        .card-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 50px;
+            margin-top: 60px;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 350px;
+            height: 300px;
+            text-align: center;
+            overflow: hidden;
+            padding: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+        .card-logo {
+            width: 50px;
+            height: 50px;
+            margin: 5px auto;
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            margin: 10px 10px;
+            color: #333;
+        }
+
+        .card p {
+            font-size: .90rem;
+            color: #333;
+            margin: 20px 0;
+            max-width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .card button {
+            background-color: #00ba10;
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            margin: 10px 0;
+            border-radius: 20px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .card button:hover {
+            background-color: #00a531;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav>
+        <div class="logo-container">
+            <img src="../static/cropwise_logo.png" alt="Logo" class="logo">
+            <h1>CropWise</h1>
+        </div>
+        <ul>
+            <li class="account-dropdown">
+                <a href="#account">My Account | admin</a>
+                <div class="dropdown-content">
+                    <a href="/profile">
+                        <img src="../static/profile.png" alt="Profile Icon" class="dropdown-icon"> Profile
+                    </a>
+                    <a href="/">
+                        <img src="../static/logout.png" alt="Logout Icon" class="dropdown-icon"> Logout
+                    </a>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Navigation -->
+    <div class="main-nav">
+        <ul>
+            <li><a href="/home">Home</a></li>
+            <li><a href="/crop-inventory">Crop Inventory</a></li>
+            <li><a href="/harvest_management">Harvest Management</a></li>
+            <li><a href="/contact">Contact Us</a></li>
+        </ul>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>Manage crop farming efficiently. CropWise can help.</h1>
+        <p>
+            Managing your crops has never been easier. Keep track of harvest dates, quantities, seasonal categories, and more—all in one place. Whether you're a seasoned farmer or just starting out, this tool is designed to simplify your work and help you focus on what you do best: growing great crops.
+        </p>
+
+        <!-- Card Section -->
+        <div class="card-container">
+            <div class="card">
+                <img src="../static/inventory_logo.png" alt="Crop Inventory Logo" class="card-logo">
+                <h2>Crop Inventory</h2>
+                <p>Manage your crops efficiently and effectively with a crop inventory system, a powerful tool designed to streamline agricultural operations.</p>
+            </div>
+            <div class="card">
+                <img src="../static/management_logo.png" alt="Harvest Management Logo" class="card-logo">
+                <h2>Harvest Management</h2>
+                <p>Quickly view an overview of total crops, quantities, and harvest timelines, helping you stay on top of your agricultural operations with ease.</p>
+            </div>
+            <div class="card">
+                <img src="../static/contact_logo.png" alt="Contact Us Logo" class="card-logo">
+                <h2>Contact Us</h2>
+                <a href="/contact">
+                    <button>Learn more</button>
+                </a>
+            </div>
+        </div>
+    </section>
+</body>
+</html>
