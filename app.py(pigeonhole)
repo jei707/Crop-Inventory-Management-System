@@ -7,6 +7,8 @@ from sqlalchemy import func
 import matplotlib.pyplot as plt
 import io
 import base64
+from faker import Faker
+from faker_food import FoodProvider
 import time
 import tracemalloc
 from datetime import datetime
@@ -20,6 +22,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///crops.db'  # SQLite database
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 CORS(app)  # Enable CORS
+fake = Faker()
+fake.add_provider(FoodProvider)
 
 # Crop model
 class Crop(db.Model):
@@ -54,6 +58,17 @@ def generate_item_code():
     return str(crop_count + 1).zfill(5)  # Ensure it's a 5-digit number (e.g., 00001, 00002)
 
 # Routes
+@app.route('/delete_all_crops', methods=['DELETE'])
+def delete_all_crops():
+    try:
+        # Delete all crop records from the database
+        Crop.query.delete()
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'All crops have been deleted.'}), 200
+    except Exception as e:
+        # Handle and log any exceptions
+        return jsonify({'success': False, 'error': str(e)}), 500
+    
 @app.route('/get_crops', methods=['GET'])
 def get_crops():
     crops = Crop.query.all()
@@ -93,6 +108,47 @@ def add_crop():
         return jsonify({"success": True, "itemCode": crop.item_code}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+    #Function to seed the database with random crops
+def seed_database():
+    if not Crop.query.first():  # Only seed if the database is empty
+        
+        for _ in range(1000):
+            crop = Crop(
+                local_name=fake.random_element(elements=[
+                        "Tomato", "Potato", "Rice", "Wheat", "Carrot", "Spinach", "Lettuce", "Onion", "Garlic", 
+                        "Corn", "Cucumber", "Cabbage", "Peas", "Soybean", "Oats", "Barley", "Millet", "Tobacco", 
+                        "Coffee", "Cocoa", "Cotton", "Banana", "Apple", "Mango", "Papaya", "Guava", "Pineapple", 
+                        "Sugarcane", "Tea", "Chili", "Bell Pepper", "Broccoli", "Cauliflower", "Zucchini", 
+                        "Pumpkin", "Sweet Potato", "Mustard", "Sunflower", "Groundnut (Peanut)", "Lentils", 
+                        "Chickpeas", "Beans", "Sesame", "Quinoa", "Sorghum", "Durum Wheat", "Flaxseed", "Coconut", 
+                        "Almond", "Cashew", "Pomegranate", "Strawberry", "Raspberry", "Blueberry", "Blackberry", 
+                        "Avocado", "Pear", "Orange", "Lemon", "Lime", "Grapefruit", "Durian", "Lychee", "Date", 
+                        "Fig", "Apricot", "Cherry", "Plum", "Peach", "Nectarine", "Kale", "Turnip", "Radish", 
+                        "Beetroot", "Artichoke", "Asparagus", "Okra", "Eggplant", "Cilantro", "Parsley", "Thyme", 
+                        "Basil", "Rosemary", "Mint", "Taro", "Yam", "Cranberry", "Gooseberry", "Starfruit", 
+                        "Jackfruit", "Watermelon", "Honeydew", "Cantaloupe", "Persimmon", "Dragon Fruit", 
+                        "Kiwifruit", "Passion Fruit", "Sugar Beet", "Horseradish", "Leek", "Scallion", "Arugula", 
+                        "Fennel", "Dill", "Chive", "Endive"
+                ]),
+                category=fake.random_element(elements=[
+                    "Vegetables", "Fruits", "Fibre Crop", "Nut", 
+                    "Root and Tuber", "Grain", "Tobacco", "Pulse", "Oil Crop"
+                ]),
+                seasonality=fake.random_element(elements=["Wet", "Dry", "Wet and Dry"]),
+                flag_description=fake.random_element(elements=["Organic", "Non-GMO", "Hybrid", "Heirloom"]),
+                harvest_date=fake.date_between(start_date='-1y', end_date='today'),
+                quantity=fake.random_int(min=10, max=500),
+                item_code=generate_item_code()  # Generate the item code
+            )
+            db.session.add(crop)
+        
+        db.session.commit()
+        print("Database seeded with 1000 entries.")
+
+@app.before_request
+def populate_database():
+    seed_database()
+
 
 @app.route('/delete_crop/<item_code>', methods=['DELETE'])
 def delete_crop(item_code):
@@ -129,8 +185,9 @@ def update_crop():
         return jsonify({"error": str(e)}), 400
 
 def get_memory_usage():
-    process = psutil.Process(os.getpid())
-    return process.memory_info().rss / 10**6  # Memory in MB
+    process = psutil.Process(os.getpid())  # Get the current process
+    memory_in_mib = process.memory_info().rss / 2**20  # Memory in MiB
+    return memory_in_mib
 
 @app.route('/sort_crops', methods=['POST'])
 def sort_crops():
@@ -171,61 +228,88 @@ def sort_crops():
 def pigeonhole_sort_with_metrics(query_result, key, is_descending=False):
     arr = [crop.to_dict() for crop in query_result]  # Convert crops to dictionaries
 
-    # Validate that key exists and contains numeric data
+    # First, attempt to check if the values are numeric or strings
     try:
-        values = [int(crop[key]) for crop in arr if key in crop]
-    except (ValueError, KeyError):
-        raise ValueError(f"The field '{key}' must exist and contain numeric values for pigeonhole sort.")
+        values = [crop[key] for crop in arr if key in crop]
+    except KeyError:
+        raise KeyError(f"The field '{key}' must exist in all crops.")
 
-    if not values:
-        raise ValueError(f"No valid numeric data found for key '{key}'.")
+    # If all values are numeric, apply pigeonhole sort for numbers
+    if all(isinstance(val, (int, float)) for val in values):
+        return pigeonhole_sort_numeric(arr, key, is_descending)
 
+    # Otherwise, apply pigeonhole sort for strings
+    return pigeonhole_sort_string(arr, key, is_descending)
+
+def pigeonhole_sort_numeric(arr, key, is_descending=False):
+    # Apply pigeonhole sort logic for numeric values
+    values = [crop[key] for crop in arr]
     min_val = min(values)
     max_val = max(values)
     range_size = max_val - min_val + 1
 
-    # Check if range size is reasonable
     if range_size > 10**6:  # Arbitrary large limit for safety
         raise ValueError(f"Range size for Pigeonhole Sort ({range_size}) is too large. Consider using a different algorithm.")
 
-    # Measure execution time in nanoseconds
     start_time_ns = time_ns()
-
-    # Get memory usage at the start
     process = psutil.Process(os.getpid())
     start_memory = process.memory_info().rss / 2**20  # Memory in MB
 
     # Create pigeonholes
     holes = [[] for _ in range(range_size)]
     for crop in arr:
-        try:
-            index = int(crop[key]) - min_val
-            holes[index].append(crop)
-        except (ValueError, KeyError):
-            continue  # Skip invalid entries
+        index = crop[key] - min_val
+        holes[index].append(crop)
 
     # Flatten the pigeonholes into a sorted array
     sorted_arr = [crop for hole in holes for crop in hole]
 
-    # Reverse the order if descending
     if is_descending:
         sorted_arr.reverse()
 
-    # Measure execution time and memory usage at the end
     end_time_ns = time_ns()
-    execution_time_ns = end_time_ns - start_time_ns  # Execution time in nanoseconds
-
     end_memory = process.memory_info().rss / 2**20  # Memory in MiB
 
-    # Prepare metrics
     metrics = {
-        "executionTime": execution_time_ns,  # Execution time in nanoseconds
+        "executionTime": end_time_ns - start_time_ns,
         "startMemory": round(start_memory, 2),
         "endMemory": round(end_memory, 2),
         "memoryUsed": round(end_memory - start_memory, 2)
     }
 
-    # Return sorted array and metrics
+    return sorted_arr, metrics
+
+def pigeonhole_sort_string(arr, key, is_descending=False):
+    # Apply pigeonhole sort logic for strings
+    values = [crop[key] for crop in arr]
+    min_val = min(values)
+    max_val = max(values)
+
+    start_time_ns = time_ns()
+    process = psutil.Process(os.getpid())
+    start_memory = process.memory_info().rss / 2**20  # Memory in MB
+
+    # Create pigeonholes (number of possible distinct characters in the string values)
+    holes = {val: [] for val in set(values)}
+    for crop in arr:
+        holes[crop[key]].append(crop)
+
+    # Flatten the pigeonholes into a sorted array
+    sorted_arr = [crop for key in sorted(holes.keys()) for crop in holes[key]]
+
+    if is_descending:
+        sorted_arr.reverse()
+
+    end_time_ns = time_ns()
+    end_memory = process.memory_info().rss / 2**20  # Memory in MiB
+
+    metrics = {
+        "executionTime": end_time_ns - start_time_ns,
+        "startMemory": round(start_memory, 2),
+        "endMemory": round(end_memory, 2),
+        "memoryUsed": round(end_memory - start_memory, 2)
+    }
+
     return sorted_arr, metrics
 
 
